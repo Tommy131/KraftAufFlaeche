@@ -53,20 +53,19 @@ void setup() {
 
 void loop() {
 
-  for (int i = 1; i < 3; i++) {
-    dxl.setGoalVelocity(i, 100, UNIT_PERCENT);
-    delay(1000);
+  dxl.setGoalVelocity(1, 100, UNIT_PERCENT);
+  dxl.setGoalVelocity(2, -100, UNIT_PERCENT);
+  delay(1000);
+/*
+  DEBUG_SERIAL.print("Present PWM(raw) : ");
+  DEBUG_SERIAL.println(dxl.getPresentPWM(i));
+  delay(1000);
 
-    DEBUG_SERIAL.print("Present PWM(raw) : ");
-    DEBUG_SERIAL.println(dxl.getPresentPWM(i));
-    delay(1000);
-
-    // Set Goal PWM using percentage (-100.0 [%] ~ 100.0 [%])
-    dxl.setGoalPWM(i, -40.8, UNIT_PERCENT);
-    delay(1000);
-    DEBUG_SERIAL.print("Present PWM(ratio) : ");
-    DEBUG_SERIAL.println(dxl.getPresentPWM(i, UNIT_PERCENT));
-    delay(1000);
-  }
-
+  // Set Goal PWM using percentage (-100.0 [%] ~ 100.0 [%])
+  dxl.setGoalPWM(i, -40.8, UNIT_PERCENT);
+  delay(1000);
+  DEBUG_SERIAL.print("Present PWM(ratio) : ");
+  DEBUG_SERIAL.println(dxl.getPresentPWM(i, UNIT_PERCENT));
+  delay(1000);
+  */
 } // loop

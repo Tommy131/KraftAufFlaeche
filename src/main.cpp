@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-
+#include "pinDef.h"
 #include <DynamixelShield.h>
 
 #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560)
@@ -35,6 +35,12 @@ DynamixelShield dxl;
 using namespace ControlTableItem;
 
 void setup() {
+
+  pinMode(PIN_FORW_DRIVE, INPUT_PULLUP);
+  pinMode(PIN_REV_DRIVE, INPUT_PULLUP);
+  pinMode(PIN_LEFT_DRIVE, INPUT_PULLUP);
+  pinMode(PIN_RIGHT_DRIVE, INPUT_PULLUP);
+  
   // For Uno, Nano, Mini, and Mega, use UART port of DYNAMIXEL Shield to debug.
   DEBUG_SERIAL.begin(115200);
 
@@ -52,9 +58,42 @@ void setup() {
 } // setup
 
 void loop() {
+  const bool forward = !digitalRead(PIN_FORW_DRIVE);
+  const bool backward = !digitalRead(PIN_REV_DRIVE);
+  const bool left = !digitalRead(PIN_LEFT_DRIVE);
+  const bool right = !digitalRead(PIN_RIGHT_DRIVE);
 
-  dxl.setGoalVelocity(1, 100, UNIT_PERCENT);
-  dxl.setGoalVelocity(2, -100, UNIT_PERCENT);
+  if (forward) {
+    if (left) {
+      dxl.setGoalVelocity(1, 40, UNIT_PERCENT);
+      dxl.setGoalVelocity(2,-20, UNIT_PERCENT);
+    } else if (right) {
+      dxl.setGoalVelocity(1, 20, UNIT_PERCENT);
+      dxl.setGoalVelocity(2,-40, UNIT_PERCENT);
+    } else {
+      dxl.setGoalVelocity(1, 40, UNIT_PERCENT);
+      dxl.setGoalVelocity(2,-40, UNIT_PERCENT);
+    }
+  } else if (backward) {
+    if (left) {
+      dxl.setGoalVelocity(1, -20, UNIT_PERCENT);
+      dxl.setGoalVelocity(2, 40, UNIT_PERCENT);
+    } else if (right) {
+      dxl.setGoalVelocity(1, -40, UNIT_PERCENT);
+      dxl.setGoalVelocity(2, 20, UNIT_PERCENT);
+    } else {
+      dxl.setGoalVelocity(1, -40, UNIT_PERCENT);
+      dxl.setGoalVelocity(2, 40, UNIT_PERCENT);
+    }
+  } else {
+      dxl.setGoalVelocity(1, 0, UNIT_PERCENT);
+      dxl.setGoalVelocity(2, 0, UNIT_PERCENT);
+  }
+
+
+  // dxl.setGoalVelocity(1, 40, UNIT_PERCENT);
+  
+  // dxl.setGoalVelocity(2,-40, UNIT_PERCENT);
   delay(1000);
 /*
   DEBUG_SERIAL.print("Present PWM(raw) : ");

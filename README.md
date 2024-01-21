@@ -14,4 +14,7 @@
 ```bash
 # Static code analysis
 pio check
+
+# run unit tests (for UNO)
+pio test -e unotest -v
 ```

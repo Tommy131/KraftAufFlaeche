@@ -1,6 +1,5 @@
 #pragma once
 #include <Arduino.h>
-#include "struct_def.h"
 
 #define PID_OUTPUT_CONSTRAIN_DEFAULT 0.5
 

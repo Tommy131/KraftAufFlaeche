@@ -86,8 +86,8 @@ void loop() {
       dxl.setGoalVelocity(2, 40, UNIT_PERCENT);
     }
   } else {
-      dxl.setGoalVelocity(1, 0, UNIT_PERCENT);
-      dxl.setGoalVelocity(2, 0, UNIT_PERCENT);
+    dxl.setGoalVelocity(1, 0, UNIT_PERCENT);
+    dxl.setGoalVelocity(2, 0, UNIT_PERCENT);
   }
 
 

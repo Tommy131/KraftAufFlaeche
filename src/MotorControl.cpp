@@ -77,3 +77,17 @@ void MotorControl::normalDrive(int8_t vel, int8_t rot){
     else if (trim_motor > 1.0) m2 = (m2/trim_motor);
     */
 }
+
+
+uint32_t MotorControl::calc_motor_vel(int8_t vel, bool invert_motors) {
+    bool invert = false;
+    uint32_t motor_speed = map(abs(vel), 0, 100, 0, 1023);
+    if (invert_motors && (vel > 0)) {
+        invert = true;
+    }
+    if (!invert_motors && (vel < 0)) {
+        invert = true;
+    }
+    motor_speed ^= (invert<<10);
+    return motor_speed;
+}

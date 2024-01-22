@@ -20,6 +20,7 @@ SoftwareSerial soft_serial(7, 8); // DYNAMIXELShield UART RX/TX
 //drive
 MotorControl motorControl(&soft_serial);
 
+#ifndef PIO_UNIT_TESTING // for unit testing
 void setup() {
   ////Pin Init
   //pinMode(PIN_FORW_DRIVE, INPUT_PULLUP);
@@ -46,3 +47,4 @@ void loop() {
 
 
 } // loop
+#endif // PIO_UNIT_TESTING

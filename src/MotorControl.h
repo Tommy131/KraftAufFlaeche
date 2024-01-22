@@ -41,4 +41,11 @@ public:
      * 
     */
     void normalDrive(int8_t vel, int8_t rot);
+
+    /**
+     * @brief logic for abstracting DXL quirks
+     * @param vel velocity, speed ranging from -100 until 100
+     * @param invert_motors Set to true if inverted
+    */
+    uint32_t calc_motor_vel(int8_t vel, bool invertMotors);
 };

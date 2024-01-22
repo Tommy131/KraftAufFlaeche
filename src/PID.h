@@ -1,12 +1,12 @@
 #pragma once
 #include <Arduino.h>
 
-#define PID_OUTPUT_CONSTRAIN_DEFAULT 0.5
+#define PID_OUTPUT_CONSTRAIN_DEFAULT 100.0
 
 class PID {
 
 public:
-    PID(float P_Gain, float D_Gain, float I_Gain, bool P_Gain_Boost, bool use_avr_on_DGain);
+    PID(float P_Gain, float D_Gain, float I_Gain, bool P_Gain_Boost, bool use_avg_on_DGain);
 
     void setGain(float P_Gain, float D_Gain, float I_Gain);
     float calculations(float data);
@@ -44,7 +44,7 @@ private:
     bool Kp_boost_activ;
     float Kp_boost;
 
-    bool use_avr;
+    bool use_avg;
     float avr_error;
 };
 

@@ -1,5 +1,5 @@
-#include <Arduino.h>
 #pragma once
+#include <Arduino.h>
 
 #include <DynamixelShield.h>
 #include <SoftwareSerial.h>

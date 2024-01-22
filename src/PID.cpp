@@ -1,7 +1,7 @@
 #include "PID.h"
 
 
-PID::PID(float P_Gain, float D_Gain, float I_Gain, bool P_Gain_Boost, bool use_avr_on_DGain)
+PID::PID(float P_Gain, float D_Gain, float I_Gain, bool P_Gain_Boost, bool use_avg_on_DGain)
     : error(0)
     , PID_output(0) 
     , data_prev(0)
@@ -21,7 +21,7 @@ PID::PID(float P_Gain, float D_Gain, float I_Gain, bool P_Gain_Boost, bool use_a
     Ki = I_Gain;
 
     Kp_boost_activ = P_Gain_Boost;
-    use_avr = use_avr_on_DGain;
+    use_avg = use_avg_on_DGain;
 }
 
 
@@ -48,11 +48,12 @@ float PID::calculations(float data){
     if(Kp_boost_activ) calcBoostP();
     else Kp_boost = 0;
 
-    if(use_avr){
+    if(use_avg){
         avr_error = (error + avr_error) / 2;
         derivative = avr_error;
     } else derivative = (error - error_prev) / delta_time; 
-    PID_output = ((Kp + Kp_boost) * error + Ki * integral + Kd * derivative)/10; //scaled by 10 to bring within -1 to 1 range
+
+    PID_output = ((Kp + Kp_boost) * error + Ki * integral + Kd * derivative);
     PID_output = constrain(PID_output, -pid_output_constrain, pid_output_constrain);
     
     //Update altitude vars

@@ -1,6 +1,9 @@
+#include "Arduino.h"
+
 #include "MotorControl.h"
 #include "SoftwareSerial.h"
 #include "constants.h"
+
 
 // This namespace is required to use Control table item names
 using namespace ControlTableItem;

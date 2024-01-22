@@ -4,19 +4,18 @@
 #include <constants.h>
 #include <Wire.h>
 
-TwoWire Wire1;
 
 ToF::ToF() {
 }
 
 
-
-void ToF::init_ToF(){
-    Wire1.begin();
-    Wire1.setClock(1000000);    //note that it is way bigger than the max from the datasheet(400kHz) 
+bool ToF::init_ToF(){
+    Wire.begin();
+    Wire.setClock(400000);
     sensorInit = sensor_ToF.init();
-    if(!sensorInit) return;
+    if(!sensorInit) return false;
     sensor_ToF.startContinuous();
+    return true;
 }
 
 
@@ -30,23 +29,21 @@ bool ToF::read_ToF_mm(uint16_t& range_in){
         prev_millis_ToF = millis();
         if(!sensorInit)                 valid_reading = false; //do nothing if not init
         else {
-            uint16_t temp_range = 4642;
+            uint16_t temp_range = 0;
             temp_range = sensor_ToF.readRangeContinuousMillimeters();
-            if(temp_range == 4642)      valid_reading = valid_reading_prev;  //indicates no data has been changed
-            else if(temp_range >= 3000) valid_reading = false; //indicates generally a bad reading(max range 2000mm)
+            if(temp_range >= 3000) valid_reading = false; //indicates generally a bad reading(max range 2000mm)
             else {
-                //Serial.print("tempRange: "); Serial.print(temp_range); Serial.print(" avrRange_bev:"); Serial.print(avr_range);
-                //avr_range = (temp_range + avr_range)/2;
-                avr_range = ((float)avr_range_prev + tof_q * ((float)temp_range - (float)avr_range_prev)); //filter the values
-                avr_range_prev = avr_range;
+                //Serial.print("tempRange: "); Serial.print(temp_range); Serial.print(" avrRange_bev:"); Serial.print(avg_range);
+                //avg_range = (temp_range + avg_range)/2;
+                avg_range = ((float)avg_range_prev + tof_q * ((float)temp_range - (float)avg_range_prev)); //filter the values
+                avg_range_prev = avg_range;
                 last_range = temp_range;
                 valid_reading = true;
-                //Serial.print(" avr_range_after: "); Serial.print(avr_range); Serial.println(" avr!");
-                range_in = avr_range;
+                //Serial.print(" avr_range_after: "); Serial.print(avg_range); Serial.println(" avr!");
+                range_in = avg_range;
             }
         }
     }
     valid_reading_prev = valid_reading;
     return valid_reading;
 }
-

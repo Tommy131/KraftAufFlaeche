@@ -6,7 +6,7 @@
 
 //Init for SoftSerial
 #include <SoftwareSerial.h>
-SoftwareSerial soft_serial(9, 10); // DYNAMIXELShield UART RX/TX
+SoftwareSerial soft_serial(SOFT_DEBUG_RX, SOFT_DEBUG_TX); // DYNAMIXELShield UART RX/TX
 
 
 //TODO: CONTROL TABLE MAX TORQUE

@@ -6,7 +6,7 @@
 
 //Init for SoftSerial
 #include <SoftwareSerial.h>
-SoftwareSerial soft_serial(7, 8); // DYNAMIXELShield UART RX/TX
+SoftwareSerial soft_serial(9, 10); // DYNAMIXELShield UART RX/TX
 
 
 //TODO: CONTROL TABLE MAX TORQUE
@@ -25,9 +25,14 @@ void setup() {
   
   //SS
   soft_serial.begin(BAUD_SERIAL);
+  soft_serial.println("Setting up...");
 
   //ToF init
-  distWall.init_ToF();
+  const bool ok = distWall.init_ToF();
+  if (!ok) {
+    soft_serial.println("ERROR: init_ToF() failed");
+    delay(5000);
+  }
 
   //drive init
   motorControl.init();
@@ -39,9 +44,13 @@ void setup() {
 uint16_t dist = 0;
 
 void loop() {
-  
-  distWall.read_ToF_mm(dist);
-  soft_serial.print(dist);  //debug output for testing
+  soft_serial.println("loop()");
+
+  const bool val_ok = distWall.read_ToF_mm(dist);
+  if (!val_ok) {
+    soft_serial.println("ERROR: read_ToF_mm()");
+  }
+  soft_serial.println(dist);  //debug output for testing
 
   float steer = pidWall.calculations(dist);
   motorControl.normalDrive(100, steer);

@@ -3,6 +3,7 @@
 #include "PID.h"
 #include "ToF.h"
 #include "MotorControl.h"
+#include "pathControl.h"
 
 //Init for SoftSerial
 #include <SoftwareSerial.h>
@@ -12,10 +13,11 @@ SoftwareSerial soft_serial(SOFT_DEBUG_RX, SOFT_DEBUG_TX); // DYNAMIXELShield UAR
 //TODO: CONTROL TABLE MAX TORQUE
 
 //Init for PID
-PID pidWall(5, 0, 0, 0, 0);
+PID pidWall(KD_PID, KD_PID, KI_PID, 0, false);
 
 //Init ToF
 ToF distWall;
+pathControl path(100, &soft_serial);
 
 //drive
 MotorControl motorControl(&soft_serial);
@@ -39,6 +41,7 @@ void setup() {
 
   //PID init
   pidWall.setpoint = 200.0;
+  path.init();
 } // setup
 
 uint16_t dist = 0;

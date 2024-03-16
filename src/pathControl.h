@@ -1,0 +1,67 @@
+#pragma once
+
+#include <Arduino.h>
+#include <SoftwareSerial.h>
+
+#include "constants.h"
+#include "ToF.h"
+#include "PID.h"
+#include "MotorControl.h"
+
+
+class pathControl {
+
+private:
+    uint16_t dist; //in mm
+
+    ToF *frontToF;
+    ToF *backToF;
+
+    PID pidDefault = PID(KD_PID, KD_PID, KI_PID, 0, false);
+    PID *pid;
+    
+    MotorControl motorDefault = MotorControl(serial_out);
+    MotorControl *motors;
+
+    SoftwareSerial *serial_out;
+
+public:
+    pathControl(uint16_t _dist, SoftwareSerial *_serial_out);
+    pathControl(uint16_t _dist, SoftwareSerial *_serial_out, MotorControl *_motors);
+    pathControl(uint16_t _dist, SoftwareSerial *_serial_out, MotorControl *_motors, ToF *_front_ToF, ToF *_backToF, PID *_pid);
+    ~pathControl();
+
+    uint16_t getDist() const        { return dist; }
+    void setDist(uint16_t _dist)    { dist = constrain(_dist, 0, 2000); }
+
+    /**
+     * @brief startups all uses Objects and sensors
+     * @return bool value if init was successful ('true' if successful) 
+    */
+    uint8_t init();
+
+    /**
+     * @brief complete what should be done in one loop 
+     * @return outputs output codes defined in pathControl.h
+    */
+    uint8_t loop();
+
+    /**
+     * @brief checks ToF sensor for occurrence of a corner in the control surface
+     * @return outputs output codes defined in pathControl.h [OUT_CODE_OK, OUT_CODE_CORNER, OUT_CODE_NO_TOF_MESS]
+    */
+    uint8_t checkForCorner();
+
+    /**
+     * @brief executes a shortcut maneuver to shortcut corners 
+    */
+    void shortcutCorner();
+
+    //output codes
+    const uint8_t OUT_CODE_ERR           = 0;
+    const uint8_t OUT_CODE_OK            = 1;   //
+    const uint8_t OUT_CODE_CORNER        = 2;   //If a corner is detected
+    const uint8_t OUT_CODE_NO_TOF_MESS   = 3;   //If no ToF measurement could be done 
+
+};
+

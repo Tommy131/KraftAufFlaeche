@@ -39,58 +39,58 @@ void MotorControl::init(){
 
 void MotorControl::normalDrive(int8_t vel, int8_t rot){
     
-    vel = constrain(vel, -100, 100);
-    rot = constrain(rot, -100, 100);
+    vel = constrain(vel, -MAX_PERCENT, MAX_PERCENT);
+    rot = constrain(rot, -MAX_PERCENT, MAX_PERCENT);
     
-    int32_t m1 = 0;
-    int32_t m2 = 0;
+    int32_t mot1 = 0;
+    int32_t mot2 = 0;
 
     if (rot < 0){
-        m1 = vel;
-        m2 = vel  * float(rot/float(-100));
+        mot1 = vel;
+        mot2 = vel  * float(rot/float(-MAX_PERCENT));
 
     } else if(rot > 0) {
 
-        m2 = vel;
-        m1 = vel * float(rot/float(100));
+        mot2 = vel;
+        mot1 = vel * float(rot/float(MAX_PERCENT));
 
     } else {
     
-        m2 = vel;
-        m1 = vel;
+        mot2 = vel;
+        mot1 = vel;
     }
-    if(m1 > 0){
+    if(mot1 > 0){
 
     }
 
     bool inv_m1 = false;
     bool inv_m2 = false;
-    if(m1 > 0) inv_m1 = true;
-    if(m2 < 0) inv_m2 = true;
-    uint32_t _m1 = map(abs(m1), 0, 100, 0, 1023);
-    uint32_t _m2 = map(abs(m2), 0, 100, 0, 1023);
+    if(mot1 > 0) inv_m1 = true;
+    if(mot2 < 0) inv_m2 = true;
+    uint32_t _m1 = map(abs(mot1), 0, MAX_PERCENT, 0, RES_MOTOR);
+    uint32_t _m2 = map(abs(mot2), 0, MAX_PERCENT, 0, RES_MOTOR);
     
-    _m1 ^= (inv_m1<<10);
-    _m2 ^= (inv_m2<<10);
+    _m1 ^= (inv_m1<<RES_MOTOR_BIT);
+    _m2 ^= (inv_m2<<RES_MOTOR_BIT);
 
-    dxl.setGoalVelocity(MotorMap::ML, _m1, UNIT_RAW);//-float(m1), UNIT_PERCENT);
-    dxl.setGoalVelocity(MotorMap::MR, _m2, UNIT_RAW);//float(m2), UNIT_PERCENT);
+    dxl.setGoalVelocity(MotorMap::ML, _m1, UNIT_RAW);//-float(mot1), UNIT_PERCENT);
+    dxl.setGoalVelocity(MotorMap::MR, _m2, UNIT_RAW);//float(mot2), UNIT_PERCENT);
     /*
-    if (trim_motor < 1.0) m1 = (m1*trim_motor);
-    else if (trim_motor > 1.0) m2 = (m2/trim_motor);
+    if (trim_motor < 1.0) mot1 = (mot1*trim_motor);
+    else if (trim_motor > 1.0) mot2 = (mot2/trim_motor);
     */
 }
 
 
 uint32_t MotorControl::calc_motor_vel(int8_t vel, bool invert_motors) {
     bool invert = false;
-    uint32_t motor_speed = map(abs(vel), 0, 100, 0, 1023);
+    uint32_t motor_speed = map(abs(vel), 0, MAX_PERCENT, 0, RES_MOTOR);
     if (invert_motors && (vel > 0)) {
         invert = true;
     }
     if (!invert_motors && (vel < 0)) {
         invert = true;
     }
-    motor_speed ^= (invert<<10);
+    motor_speed ^= (invert<<RES_MOTOR_BIT);
     return motor_speed;
 }

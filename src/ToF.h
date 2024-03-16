@@ -30,12 +30,15 @@ public:
     */
     bool read_ToF_mm(uint16_t& range);
 
+    uint16_t read_ToF_mm();
 
+    bool getInit() const        { return sensorInit; }
     
-    uint16_t last_range = 0;    //range from last iteration
-    uint16_t avg_range = 0;     //range after the filter
-    uint16_t range = 0;         //raw range value without filter 
-    bool valid_reading = false; //true if a valid reading is available
+
+    uint16_t getLastRange() const   { return last_range; }
+    uint16_t getAvgRange() const    { return avg_range; }
+    bool     getValidRead() const   { return valid_reading; }
+
 
 private:
     bool sensorInit;            //if true the sensor is initialised, else no value is reported
@@ -46,4 +49,7 @@ private:
     bool valid_reading_prev;
     uint16_t avg_range_prev = 0;
 
+    uint16_t last_range = 0;    //range from last iteration without filter 
+    uint16_t avg_range = 0;     //range after the filter
+    bool valid_reading = false; //true if a valid reading is available
 };

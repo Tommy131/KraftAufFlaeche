@@ -18,6 +18,11 @@ bool ToF::init_ToF(){
     return true;
 }
 
+uint16_t ToF::read_ToF_mm(){
+    uint16_t range_in = 0;
+    if(read_ToF_mm(range_in)) return range_in;
+    return last_range;
+}
 
 /**
  * reads the distance information in an nonBlocking way. if no valid value is found, range is not updated.

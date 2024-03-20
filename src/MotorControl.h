@@ -1,16 +1,22 @@
 #pragma once
 #include <Arduino.h>
+#include <HardwareSerial.h>
 
 #include <DynamixelShield.h>
-#include <SoftwareSerial.h>
+
+#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) //Include SoftwareSerial When using Arduino
+    #include <SoftwareSerial.h>
+#endif
+
 #include "constants.h"
 using namespace ControlTableItem;
 
 
 enum MotorMap{
-    ML=1,   //Motor Left with ID
-    MR=2   //Motor Right with ID
+    MLeft=1,   //Motor Left with ID
+    MRight=2   //Motor Right with ID
 };
+
 
 
 class MotorControl {
@@ -19,7 +25,7 @@ private:
     DynamixelShield dxl;
 
     const float DXL_PROTOCOL_VERSION = 1.0; // important, our motors are 1.0
-    SoftwareSerial *softSerial;
+    SerialType *serialOut;
 
     const uint8_t maxServos = 2;
     const uint32_t baudServos = 1000000; // important, our motors are 1M
@@ -28,11 +34,15 @@ private:
     const uint8_t trim_motor = 0; 
 
 public:
-    MotorControl(SoftwareSerial *_softSerial);
+    MotorControl(SerialType *_softSerial);
     ~MotorControl();
 
 
-    void init();
+    /**
+     * @brief Initialises all motors and checks there Existence
+     * @return returns output code either OUT_CODE_OK or OUT_ERR_MOTOR  
+    */
+    uint8_t init();
 
     /**
      * @brief Normal driving mode, with extra features vel=0 equals rotating on the spot

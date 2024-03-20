@@ -1,29 +1,31 @@
 #include "pathControl.h"
 
 #include <Arduino.h>
-#include <SoftwareSerial.h>
 
+#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) //Include SoftwareSerial When using Arduino
+    #include <SoftwareSerial.h>
+#endif
 
 #include "constants.h"
 #include "ToF.h"
 #include "PID.h"
 #include "MotorControl.h"
 
-pathControl::pathControl(uint16_t _dist, SoftwareSerial *_serial_out) {
+pathControl::pathControl(uint16_t _dist, SerialType *_serial_out) {
     dist = constrain(_dist, 0, 2000);
     serial_out = _serial_out;
     motors = &motorDefault;
     pid = &pidDefault;
 }
 
-pathControl::pathControl(uint16_t _dist, SoftwareSerial *_serial_out, MotorControl *_motors) {
+pathControl::pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors) {
     dist = constrain(_dist, 0, 2000);
     serial_out = _serial_out;
     motors = _motors;
     pid = &pidDefault;
 }
 
-pathControl::pathControl(uint16_t _dist, SoftwareSerial *_serial_out, MotorControl *_motors, ToF  *_frontToF, ToF *_backToF, PID *_pid){
+pathControl::pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors, ToF  *_frontToF, ToF *_backToF, PID *_pid){
     dist = constrain(_dist, 0, 2000);
     serial_out = _serial_out;
     motors = _motors;

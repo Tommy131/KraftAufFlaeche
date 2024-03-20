@@ -10,11 +10,17 @@ ToF::ToF() {
 
 
 bool ToF::init_ToF(){
+    #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
     Wire.begin();
-    Wire.setClock(400000);
+    #elif defined(ARDUINO_ARCH_ESP32)
+    Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
+    #endif
+    
+    
+    //Wire.setClock(400000);
     sensorInit = sensor_ToF.init();
     if(!sensorInit) return false;
-    sensor_ToF.startContinuous();
+    //sensor_ToF.startContinuous();
     return true;
 }
 

@@ -1,7 +1,10 @@
 #pragma once
 
 #include <Arduino.h>
-#include <SoftwareSerial.h>
+
+#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) //Include SoftwareSerial When using Arduino
+    #include <SoftwareSerial.h>
+#endif
 
 #include "constants.h"
 #include "ToF.h"
@@ -23,12 +26,12 @@ private:
     MotorControl motorDefault = MotorControl(serial_out);
     MotorControl *motors;
 
-    SoftwareSerial *serial_out;
+    SerialType *serial_out;
 
 public:
-    pathControl(uint16_t _dist, SoftwareSerial *_serial_out);
-    pathControl(uint16_t _dist, SoftwareSerial *_serial_out, MotorControl *_motors);
-    pathControl(uint16_t _dist, SoftwareSerial *_serial_out, MotorControl *_motors, ToF *_front_ToF, ToF *_backToF, PID *_pid);
+    pathControl(uint16_t _dist, SerialType *_serial_out);
+    pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors);
+    pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors, ToF *_front_ToF, ToF *_backToF, PID *_pid);
     ~pathControl();
 
     uint16_t getDist() const        { return dist; }
@@ -57,11 +60,7 @@ public:
     */
     void shortcutCorner();
 
-    //output codes
-    const uint8_t OUT_CODE_ERR           = 0;
-    const uint8_t OUT_CODE_OK            = 1;   //
-    const uint8_t OUT_CODE_CORNER        = 2;   //If a corner is detected
-    const uint8_t OUT_CODE_NO_TOF_MESS   = 3;   //If no ToF measurement could be done 
+
 
 };
 

@@ -5,10 +5,13 @@
 #include "MotorControl.h"
 #include "pathControl.h"
 
-//Init for SoftSerial
-#include <SoftwareSerial.h>
-SoftwareSerial soft_serial(SOFT_DEBUG_RX, SOFT_DEBUG_TX); // DYNAMIXELShield UART RX/TX
-
+#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
+  //Init for SoftSerial
+  #include <SoftwareSerial.h>
+  SoftwareSerial serial_out(SOFT_DEBUG_RX, SOFT_DEBUG_TX); // DYNAMIXELShield UART RX/TX
+#elif defined(ARDUINO_ARCH_ESP32)
+  HardwareSerial serial_out = Serial;
+#endif
 
 //TODO: CONTROL TABLE MAX TORQUE
 
@@ -17,22 +20,22 @@ PID pidWall(KD_PID, KD_PID, KI_PID, 0, false);
 
 //Init ToF
 ToF distWall;
-pathControl path(100, &soft_serial);
+pathControl path(100, &serial_out);
 
 //drive
-MotorControl motorControl(&soft_serial);
+MotorControl motorControl(&serial_out);
 
 #ifndef PIO_UNIT_TESTING // for unit testing
 void setup() {
   
   //SS
-  soft_serial.begin(BAUD_SERIAL);
-  soft_serial.println("Setting up...");
+  serial_out.begin(BAUD_SERIAL);
+  serial_out.println("Setting up...");
 
   //ToF init
   const bool ok = distWall.init_ToF();
   if (!ok) {
-    soft_serial.println("ERROR: init_ToF() failed");
+    serial_out.println("ERROR: init_ToF() failed");
     delay(5000);
   }
 
@@ -47,13 +50,13 @@ void setup() {
 uint16_t dist = 0;
 
 void loop() {
-  soft_serial.println("loop()");
+  serial_out.println("loop()");
 
   const bool val_ok = distWall.read_ToF_mm(dist);
   if (!val_ok) {
-    soft_serial.println("ERROR: read_ToF_mm()");
+    serial_out.println("ERROR: read_ToF_mm()");
   }
-  soft_serial.println(dist);  //debug output for testing
+  serial_out.println(dist);  //debug output for testing
 
   float steer = pidWall.calculations(dist);
   motorControl.normalDrive(100, steer);

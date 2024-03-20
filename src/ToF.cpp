@@ -9,19 +9,30 @@ ToF::ToF() {
 }
 
 
-bool ToF::init_ToF(){
+uint8_t ToF::init_ToF(int8_t PIN_OFF /* = -1*/, uint8_t changeAdress /* = 0x60*/){
+    
     #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
     Wire.begin();
     #elif defined(ARDUINO_ARCH_ESP32)
     Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
     #endif
     
-    
+    if(PIN_OFF != -1) {
+        if(changeAdress == sensor_ToF.I2C_SLAVE_DEVICE_ADDRESS) return OUT_CODE_INVAL_NUM;
+        digitalWrite(PIN_XSHUT_TOF_1, LOW);
+    }
     //Wire.setClock(400000);
     sensorInit = sensor_ToF.init();
-    if(!sensorInit) return false;
-    //sensor_ToF.startContinuous();
-    return true;
+    if(!sensorInit) {
+        if(PIN_OFF != -1) digitalWrite(PIN_XSHUT_TOF_1, HIGH);
+        return OUT_CODE_ERR;
+    }
+    if(PIN_OFF != -1) {
+        sensor_ToF.setAddress(changeAdress);
+        digitalWrite(PIN_XSHUT_TOF_1, HIGH);
+    }
+    sensor_ToF.startContinuous();
+    return OUT_CODE_OK;
 }
 
 uint16_t ToF::read_ToF_mm(){

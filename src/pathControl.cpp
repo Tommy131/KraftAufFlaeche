@@ -15,6 +15,8 @@ pathControl::pathControl(uint16_t _dist, SerialType *_serial_out) {
     dist = constrain(_dist, 0, 2000);
     serial_out = _serial_out;
     motors = &motorDefault;
+    frontToF = &frontToF_default;
+    backToF = &backToF_default;
     pid = &pidDefault;
 }
 
@@ -22,6 +24,8 @@ pathControl::pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *
     dist = constrain(_dist, 0, 2000);
     serial_out = _serial_out;
     motors = _motors;
+    frontToF = &frontToF_default;
+    backToF = &backToF_default;
     pid = &pidDefault;
 }
 
@@ -39,12 +43,15 @@ pathControl::~pathControl(){}
 
 uint8_t pathControl::init(){
     uint8_t ret = 0;
-    if(!frontToF->getInit())    ret += !frontToF->init_ToF();
+    if(!frontToF->getInit())    ret += !frontToF->init_ToF(PIN_XSHUT_TOF_1, ADDRESS_TOF_2);
     if(!backToF->getInit())     ret += !backToF->init_ToF();
 
-    motors->init();
+    ret += !motors->init();
 
-    return ret;
+    pid->setpoint = dist;
+
+    if(ret == 0) return OUT_CODE_OK;
+    else return OUT_CODE_ERR;
 }
 
 
@@ -64,7 +71,7 @@ uint8_t pathControl::checkForCorner(){
     //TODO: More Sophisticated?
     frontToF->read_ToF_mm();
     if(frontToF->getValidRead()){
-        if(frontToF->getAvgRange() >= CORNER_THR)   {
+        if(frontToF->getAvgRange() >= CORNER_THR && backToF->getAvgRange() <= CORNER_THR)   {
             return OUT_CODE_CORNER;
         }
         return OUT_CODE_OK;

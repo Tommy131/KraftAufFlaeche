@@ -6,9 +6,9 @@
 #define BAUD_SERIAL 115200
 
 
-#define KP_PID 5
-#define KI_PID 0
-#define KD_PID 0
+#define KP_PID 1.0
+#define KI_PID 0.0
+#define KD_PID 0.0
 
 //pathControl
 #define CORNER_THR 5000 //mm //If value is bigger or equal a corner is detected
@@ -24,7 +24,11 @@
     const uint8_t OUT_CODE_OK            = 1;   //
     const uint8_t OUT_CODE_CORNER        = 2;   //If a corner is detected
     const uint8_t OUT_CODE_NO_TOF_MESS   = 3;   //If no ToF measurement could be done 
-    const uint8_t OUT_CODE_ERR_MOTOR     = 3;   //If no ToF measurement could be done 
+    const uint8_t OUT_CODE_ERR_MOTOR     = 4;   //If no ToF measurement could be done 
+    const uint8_t OUT_CODE_INVAL_NUM     = 5;   //If the number Provided is invalid 
+
+#define PIN_XSHUT_TOF_1 18 //Pin for the Xshut pin of one of the ToF sensors
+#define ADDRESS_TOF_2 0x60 //Changed Address of second ToF chip
 
 #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
     #include <SoftwareSerial.h>

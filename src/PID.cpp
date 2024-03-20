@@ -55,7 +55,6 @@ float PID::calculations(float data){
 
     PID_output = ((Kp + Kp_boost) * error + Ki * integral + Kd * derivative);
     PID_output = constrain(PID_output, -pid_output_constrain, pid_output_constrain);
-    
     //Update altitude vars
     error_prev = error;
     integral_prev = integral;

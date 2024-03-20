@@ -19,6 +19,10 @@ private:
 
     ToF *frontToF;
     ToF *backToF;
+    
+    ToF frontToF_default;
+    ToF backToF_default;
+
 
     PID pidDefault = PID(KD_PID, KD_PID, KI_PID, 0, false);
     PID *pid;

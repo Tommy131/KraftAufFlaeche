@@ -2,8 +2,10 @@
 
 #pragma once
 #include <Arduino.h>
-
 #include <VL53L0X.h>
+
+
+#include "constants.h"
 
 
 const float tof_q           = 0.3;  //Process Variance - usually a small number between 0.1 - 0.3
@@ -19,9 +21,11 @@ public:
 
     /**
      * @brief init sensor and starts the continues measurement mode 
-     * @return true if success, else false
+     * @param PIN_OFF if set defines the Pin with that the other ToF sensor can be disabled
+     * @param changeAdress this is the new address with that the sensor should be addressed
+     * @return OUT_CODE_ERR and OUT_CODE_OK, OUT_CODE_INVAL_NUM if changeAddress is the same as default
     */
-    bool init_ToF();
+    uint8_t init_ToF(int8_t PIN_OFF  = -1, uint8_t changeAdress  = ADDRESS_TOF_2);
 
     /**
      * @brief reads the sensor in an unblocking way and uses a filter to reduce noise.

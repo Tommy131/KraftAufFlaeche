@@ -25,8 +25,10 @@ MotorControl::~MotorControl() {
 uint8_t MotorControl::init(){
 
     //DXL Init
-    dxl.begin(baudServos); 
+    dxl.begin(baudServos);
+#if defined(ARDUINO_ARCH_ESP32)
     DXL_SERIAL.setPins(PIN_RX_DXL, PIN_TX_DXL);
+#endif
     dxl.setPortProtocolVersion(DXL_PROTOCOL_VERSION);
 
     for (int i = 1; i < maxServos + 1; i++) {

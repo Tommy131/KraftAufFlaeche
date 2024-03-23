@@ -9,7 +9,8 @@
 #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
   //Init for SoftSerial
   #include <SoftwareSerial.h>
-  SoftwareSerial serial_out(SOFT_DEBUG_RX, SOFT_DEBUG_TX); // DYNAMIXELShield UART RX/TX
+  SoftwareSerial sw_serial_out(SOFT_DEBUG_RX, SOFT_DEBUG_TX); // DYNAMIXELShield UART RX/TX
+  #define serial_out (&sw_serial_out)
 #elif defined(ARDUINO_ARCH_ESP32)
   HardwareSerial* serial_out = &Serial;
 #endif
@@ -65,7 +66,15 @@ void loop() {
   float test_dist = dist;
   float steer = pidWall.calculations(dist);
   //motorControl.normalDrive(100, steer);
+
+#if defined(ARDUINO_ARCH_ESP32)
   serial_out->printf("Dist:%dmm, PID: %f\n", dist, steer);  //debug output for testing
+#else
+  serial_out->print("Dist: ");
+  serial_out->print(dist, DEC);
+  serial_out->print(", PID: ");
+  serial_out->println(steer, 4);
+#endif
 
   delay(100);
 } // loop

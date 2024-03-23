@@ -42,11 +42,14 @@
 
     #define DXL_SERIAL Serial1  
 
-    #define PIN_TX_DXL 22   //Pin for Tx communication to the Dynamixel
-    #define PIN_RX_DXL 21   //Pin for Rx communication to the Dynamixel
-    #define PIN_SW_DXL 16   //Pin for the switching between TX/RX communication to the Dynamixel
+    #define PIN_TX_DXL 22   // Pin for Tx communication to the Dynamixel
+    #define PIN_RX_DXL 21   // Pin for Rx communication to the Dynamixel
+    #define PIN_SW_DXL 16   // Pin for the switching between TX/RX
+                            // communication to the Dynamixel (DXL)
+                            // HIGH -> send to DXL
+                            // LOW  -> receive from DXL
 
-    #define PIN_I2C_SDA 19   //Pin for SDA communication to the Dynamixel
-    #define PIN_I2C_SCL 23   //Pin for SCL communication to the Dynamixel
+    #define PIN_I2C_SDA 19   //Pin for SDA communication to the sensor(s)
+    #define PIN_I2C_SCL 23   //Pin for SCL communication to the sensor(s)
 #endif
 

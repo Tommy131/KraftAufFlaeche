@@ -11,31 +11,25 @@
 #include "PID.h"
 #include "MotorControl.h"
 
-pathControl::pathControl(uint16_t _dist, SerialType *_serial_out) {
-    dist = constrain(_dist, 0, 2000);
-    serial_out = _serial_out;
-    motors = &motorDefault;
-    frontToF = &frontToF_default;
-    backToF = &backToF_default;
-    pid = &pidDefault;
-}
-
-pathControl::pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors) {
-    dist = constrain(_dist, 0, 2000);
-    serial_out = _serial_out;
-    motors = _motors;
-    frontToF = &frontToF_default;
-    backToF = &backToF_default;
-    pid = &pidDefault;
-}
 
 pathControl::pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors, ToF  *_frontToF, ToF *_backToF, PID *_pid){
     dist = constrain(_dist, 0, 2000);
-    serial_out = _serial_out;
-    motors = _motors;
-    frontToF = _frontToF;
-    backToF = _backToF;
-    pid = _pid;
+    
+    #error "serial_out nicht definiert"
+    if(_serial_out == nullptr)  serial_out = nullptr;
+    else                        serial_out = _serial_out;
+
+    if(motors == nullptr)       motors = &motorDefault;
+    else                        motors = _motors;
+
+    if(frontToF == nullptr)     frontToF = &backToF_default;
+    else                        frontToF = _frontToF;
+
+    if(_backToF == nullptr)     backToF = &backToF_default; 
+    else                        backToF = _backToF;
+
+    if(_pid == nullptr)         pid = &pidDefault;
+    else                        pid = _pid;
 }
 
 pathControl::~pathControl(){}

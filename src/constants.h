@@ -12,7 +12,7 @@
 
 //pathControl
 #define CORNER_THR 5000 //mm //If value is bigger or equal a corner is detected
-
+#define MAX_SPEED 100   //PERCENT that the controller should aim to meet
 
 //motorControl
 #define MAX_PERCENT 100         //%

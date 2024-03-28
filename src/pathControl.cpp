@@ -41,27 +41,70 @@ uint8_t pathControl::init(){
     pid->setpoint = dist;
 
     if(ret == 0) return OUT_CODE_OK;
-    else return OUT_CODE_ERR;
+    return OUT_CODE_ERR;
 }
 
 
 uint8_t pathControl::loop(){
-    //TODO: Implement Loop
     /**
      * 1. Check Sensors
      * 2. check for special action(shortcutCorner)
-     * 2. RUN PID
-     * 3. run Checks (Corner)
-     * 4. write to Motors
+     * 3. RUN PID   //TODO: Separate PID for front and back?
+     * 4. run Checks (Corner)
+     * 5. write to Motors
     */
-    return OUT_CODE_ERR;
+    
+   //Step 1.
+    uint16_t ToF_data = 0;
+    bool ToF_valid_front = frontToF->read_ToF_mm(ToF_data);
+    bool ToF_valid_back  = backToF->read_ToF_mm(ToF_data);                      
+    bool ToF_valid_all = (ToF_valid_front && ToF_valid_back);   //indicates if all ToF's are operational //TODO: UNUSED?
+
+    //Step 2.
+    switch (driveState) {
+    case drive_corner:
+        return shortcutCorner();
+        break;
+    
+    default:    //Normal Operation
+
+        //Step 3.
+        if(ToF_valid_back) {
+            calc_steer = pid->calculations(backToF->getAvgRange());
+        } else if (ToF_valid_front) {
+            calc_steer = pid->calculations(frontToF->getAvgRange());
+        } else {
+            motors->normalDrive(MAX_SPEED / 2, -5); // slow down, and try to get closer to the wall
+            return OUT_CODE_NO_TOF_MESS;
+        }
+
+        //Step 4.
+        int16_t ret = checkForCorner(ID_frontTof);
+        if(ret == OUT_CODE_NO_TOF_MESS) return ret;
+        else if(ret == OUT_CODE_CORNER) driveState = drive_corner;
+        else                            driveState = drive_normal;
+
+        //Step 5.
+        motors->normalDrive(MAX_SPEED, calc_steer);
+
+        break;
+    }
+
+    return OUT_CODE_OK;
 }
 
-uint8_t pathControl::checkForCorner(){
+uint8_t pathControl::checkForCorner(bool frontORback){
     //TODO: More Sophisticated?
-    frontToF->read_ToF_mm();
-    if(frontToF->getValidRead()){
-        if(frontToF->getAvgRange() >= CORNER_THR && backToF->getAvgRange() <= CORNER_THR)   {
+    ToF *readToF = backToF;
+    ToF *secToF = frontToF; 
+    if(!frontORback) {
+        readToF = frontToF;
+        secToF = backToF;
+    }
+
+    readToF->read_ToF_mm();
+    if(readToF->getValidRead()){
+        if(readToF->getAvgRange() >= CORNER_THR && secToF->getAvgRange() <= CORNER_THR)   {
             return OUT_CODE_CORNER;
         }
         return OUT_CODE_OK;
@@ -69,6 +112,26 @@ uint8_t pathControl::checkForCorner(){
     return OUT_CODE_NO_TOF_MESS;
 }
 
-void pathControl::shortcutCorner(){
-    //TODO
+uint8_t pathControl::shortcutCorner(){
+    motors->normalDrive(MAX_SPEED, -10);    //TODO TUNING!!!!!
+    int16_t ret = 0;
+    while(ret == OUT_CODE_CORNER) {
+        ret = checkForCorner(ID_frontTof);
+        if(ret == OUT_CODE_NO_TOF_MESS) return ret;
+    }
+
+    ret = 0;
+    pid->reset();
+    while(ret == OUT_CODE_CORNER) {
+        ret = checkForCorner(ID_backToF);
+        if(ret == OUT_CODE_NO_TOF_MESS) return ret;
+
+    
+        calc_steer = pid->calculations(frontToF->getAvgRange());
+        motors->normalDrive(MAX_SPEED, calc_steer);
+
+    }
+
+    driveState = drive_normal;
+    return OUT_CODE_OK;
 }

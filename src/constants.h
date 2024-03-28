@@ -19,13 +19,16 @@
 #define RES_MOTOR_BIT 10        
 #define RES_MOTOR ((2^10) -1)   //bit //resolution of motors
 
-    //output codes
-    const uint8_t OUT_CODE_ERR           = 0;
-    const uint8_t OUT_CODE_OK            = 1;   //
-    const uint8_t OUT_CODE_CORNER        = 2;   //If a corner is detected
-    const uint8_t OUT_CODE_NO_TOF_MESS   = 3;   //If no ToF measurement could be done 
-    const uint8_t OUT_CODE_ERR_MOTOR     = 4;   //If no ToF measurement could be done 
-    const uint8_t OUT_CODE_INVAL_NUM     = 5;   //If the number Provided is invalid 
+//output codes
+enum outputCode{
+    OUT_CODE_ERR           = 0,
+    OUT_CODE_OK            = 1,   //
+    OUT_CODE_CORNER        = 2,   //If a corner is detected
+    OUT_CODE_NO_TOF_MESS   = 3,   //If no ToF measurement could be done 
+    OUT_CODE_ERR_MOTOR     = 4,   //If no ToF measurement could be done 
+    OUT_CODE_INVAL_NUM     = 5,   //If the number Provided is invalid 
+};
+    
 
 #define PIN_XSHUT_TOF_1 18 //Pin for the Xshut pin of one of the ToF sensors
 #define ADDRESS_TOF_2 0x60 //Changed Address of second ToF chip

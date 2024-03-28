@@ -3,6 +3,7 @@
 #include <HardwareSerial.h>
 
 #include <DynamixelShield.h>
+//Used Motors: https://emanual.robotis.com/docs/en/dxl/ax/ax-12w
 
 #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) //Include SoftwareSerial When using Arduino
     #include <SoftwareSerial.h>

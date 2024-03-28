@@ -14,10 +14,6 @@
 
 pathControl::pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors, ToF  *_frontToF, ToF *_backToF, PID *_pid){
     dist = constrain(_dist, 0, 2000);
-    
-    #error "serial_out nicht definiert"
-    if(_serial_out == nullptr)  serial_out = nullptr;
-    else                        serial_out = _serial_out;
 
     if(motors == nullptr)       motors = &motorDefault;
     else                        motors = _motors;

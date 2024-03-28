@@ -33,7 +33,7 @@ private:
     SerialType *serial_out;
 
 public:
-    pathControl(uint16_t _dist, SerialType *_serial_out = nullptr, MotorControl *_motors = nullptr, ToF *_front_ToF = nullptr, ToF *_backToF = nullptr, PID *_pid = nullptr);
+    pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors = nullptr, ToF *_front_ToF = nullptr, ToF *_backToF = nullptr, PID *_pid = nullptr);
     ~pathControl();
 
     uint16_t getDist() const        { return dist; }

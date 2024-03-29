@@ -22,12 +22,12 @@ PID pidWall(KP_PID, KD_PID, KI_PID, 0, false);
 
 //Init ToF
 ToF distWall;
-
-//pathControl path(100, serial_out);
+ToF backWall;
 
 //drive
 MotorControl motorControl(serial_out);
 
+pathControl path(100, serial_out, &motorControl, &distWall, &backWall, &pidWall);
 #ifndef PIO_UNIT_TESTING // for unit testing
 void setup() {
 
@@ -49,9 +49,9 @@ void setup() {
   //motorControl.init();
 
   //PID init
-  pidWall.setpoint = 100.0;
+  //pidWall.setpoint = 100.0;
   
-  //path.init();
+  path.init();
 } // setup
 
 uint16_t dist = 0;
@@ -63,7 +63,6 @@ void loop() {
   if (!val_ok) {
     serial_out->println("ERROR: read_ToF_mm()");
   }
-  float test_dist = dist;
   float steer = pidWall.calculations(dist);
   //motorControl.normalDrive(100, steer);
 

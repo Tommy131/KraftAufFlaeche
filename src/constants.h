@@ -6,7 +6,7 @@
 #define BAUD_SERIAL 115200
 
 
-#define KP_PID 1.0
+#define KP_PID 0.5
 #define KI_PID 0.0
 #define KD_PID 0.0
 
@@ -25,7 +25,7 @@ enum outputCode{
     OUT_CODE_OK            = 1,   //
     OUT_CODE_CORNER        = 2,   //If a corner is detected
     OUT_CODE_NO_TOF_MESS   = 3,   //If no ToF measurement could be done 
-    OUT_CODE_ERR_MOTOR     = 4,   //If no ToF measurement could be done 
+    OUT_CODE_ERR_MOTOR     = 4,   //When problems motors are 
     OUT_CODE_INVAL_NUM     = 5,   //If the number Provided is invalid 
 };
     

@@ -17,7 +17,7 @@
 //motorControl
 #define MAX_PERCENT 100         //%
 #define RES_MOTOR_BIT 10        
-#define RES_MOTOR ((2^10) -1)   //bit //resolution of motors
+#define RES_MOTOR (1023)   //bit //resolution of motors
 
 //output codes
 enum outputCode{

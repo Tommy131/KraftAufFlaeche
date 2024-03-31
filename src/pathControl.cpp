@@ -15,10 +15,10 @@
 pathControl::pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors, ToF  *_frontToF, ToF *_backToF, PID *_pid){
     dist = constrain(_dist, 0, 2000);
 
-    if(_motors == nullptr)       motors = &motorDefault;
+    if(_motors == nullptr)      motors = &motorDefault;
     else                        motors = _motors;
 
-    if(_frontToF == nullptr)     frontToF = &backToF_default;
+    if(_frontToF == nullptr)    frontToF = &backToF_default;
     else                        frontToF = _frontToF;
 
     if(_backToF == nullptr)     backToF = &backToF_default; 

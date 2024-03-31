@@ -5,7 +5,7 @@
 
 #include "MotorControl.h"
 #include "constants.h"
-
+#define DEBUG_SERVO
 
 // This namespace is required to use Control table item names
 using namespace ControlTableItem;
@@ -35,18 +35,25 @@ uint8_t MotorControl::init(){
 
         if(dxl.ping(i)){
             #ifdef DEBUG_SERVO
-                serialOut.printf("Successfully found Servo with ID: %i - FW-Ver: %i - Model: %i\n", i, dxl.readControlTableItem(FIRMWARE_VERSION, i), dxl.getModelNumber(i));
+                serialOut->printf("Successfully found Motor with ID: %i - FW-Ver: %i - Model: %i\n", i, dxl.readControlTableItem(FIRMWARE_VERSION, i), dxl.getModelNumber(i));
             #endif //DEBUG_SERVO
         } else {
             #ifdef DEBUG_SERVO
-                serialOut.printf("Cant find Servo with ID: %i; ABORT START\n", i);
+                serialOut->printf("Cant find Motor with ID: %i; ABORT START\n", i);
             #endif //DEBUG_SERVO
             return OUT_CODE_ERR_MOTOR;
         }
-        dxl.reboot(i);
-        dxl.torqueOff(i);
-        dxl.setOperatingMode(i, operatingMode);
-        dxl.torqueOn(i);
+        uint8_t ret = 0;
+        ret += !dxl.torqueOff(i);
+        ret += !dxl.setOperatingMode(i, operatingMode);
+        ret += !dxl.torqueOn(i);
+        if(ret != 0) {
+            #ifdef DEBUG_SERVO
+                serialOut->print("ERROR ON INIT with ID: ");
+                serialOut->println(i);
+            #endif //DEBUG_SERVO
+            return OUT_CODE_ERR_MOTOR;    
+        }
     }
     return OUT_CODE_OK;
 }
@@ -75,22 +82,10 @@ void MotorControl::normalDrive(int8_t vel, int8_t rot){
         mot2 = vel;
         mot1 = vel;
     }
-    if(mot1 > 0){
 
-    }
+    dxl.setGoalVelocity(MotorMap::MLeft, calc_motor_vel(mot1, true), UNIT_RAW);
+    dxl.setGoalVelocity(MotorMap::MRight, calc_motor_vel(mot2, false), UNIT_RAW);
 
-    bool inv_m1 = false;
-    bool inv_m2 = false;
-    if(mot1 > 0) inv_m1 = true;
-    if(mot2 < 0) inv_m2 = true;
-    uint32_t _m1 = map(abs(mot1), 0, MAX_PERCENT, 0, RES_MOTOR);
-    uint32_t _m2 = map(abs(mot2), 0, MAX_PERCENT, 0, RES_MOTOR);
-    
-    _m1 ^= (inv_m1<<RES_MOTOR_BIT);
-    _m2 ^= (inv_m2<<RES_MOTOR_BIT);
-
-    dxl.setGoalVelocity(MotorMap::MLeft, _m1, UNIT_RAW);//-float(mot1), UNIT_PERCENT);
-    dxl.setGoalVelocity(MotorMap::MRight, _m2, UNIT_RAW);//float(mot2), UNIT_PERCENT);
     /*
     if (trim_motor < 1.0) mot1 = (mot1*trim_motor);
     else if (trim_motor > 1.0) mot2 = (mot2/trim_motor);

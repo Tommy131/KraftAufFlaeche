@@ -64,7 +64,7 @@ void loop() {
     serial_out->println("ERROR: read_ToF_mm()");
   }
   float steer = pidWall.calculations(dist);
-  //motorControl.normalDrive(100, steer);
+  motorControl.normalDrive(50, steer);
 
 #if defined(ARDUINO_ARCH_ESP32)
   serial_out->printf("Dist:%dmm, PID: %f\n", dist, steer);  //debug output for testing

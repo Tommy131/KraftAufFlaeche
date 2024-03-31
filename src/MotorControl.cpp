@@ -65,17 +65,17 @@ void MotorControl::normalDrive(int8_t vel, int8_t rot){
     vel = constrain(vel, -MAX_PERCENT, MAX_PERCENT);
     rot = constrain(rot, -MAX_PERCENT, MAX_PERCENT);
     
-    int32_t mot1 = 0;
-    int32_t mot2 = 0;
+    int32_t mot1 = 0; //LEFT
+    int32_t mot2 = 0; //RIGHT
 
-    if (rot < 0){
-        mot1 = vel;
-        mot2 = vel  * float(rot/float(-MAX_PERCENT));
-
-    } else if(rot > 0) {
-
+    if (rot < 0){       // Turn left
         mot2 = vel;
-        mot1 = vel * float(rot/float(MAX_PERCENT));
+        mot1 = vel  * (1 - float(rot/float(-MAX_PERCENT)));
+
+    } else if(rot > 0) { // Turn right
+
+        mot1 = vel;
+        mot2 = vel * (1 - float(rot/float(MAX_PERCENT)));
 
     } else {
     
@@ -83,8 +83,8 @@ void MotorControl::normalDrive(int8_t vel, int8_t rot){
         mot1 = vel;
     }
 
-    dxl.setGoalVelocity(MotorMap::MLeft, calc_motor_vel(mot1, true), UNIT_RAW);
-    dxl.setGoalVelocity(MotorMap::MRight, calc_motor_vel(mot2, false), UNIT_RAW);
+    dxl.setGoalVelocity(MotorMap::MLeft, calc_motor_vel(mot1, false), UNIT_RAW);
+    dxl.setGoalVelocity(MotorMap::MRight, calc_motor_vel(mot2, true), UNIT_RAW);
 
     /*
     if (trim_motor < 1.0) mot1 = (mot1*trim_motor);

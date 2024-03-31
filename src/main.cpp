@@ -37,14 +37,6 @@ void setup() {
   pinMode(PIN_XSHUT_TOF_1, OUTPUT);
   digitalWrite(PIN_XSHUT_TOF_1, HIGH);
   
-  //ToF init
-  bool ok = distWall.init_ToF();
-  if (!ok) {
-    serial_out->println("ERROR: init_ToF() failed");
-    delay(5000);
-    while(true);
-  }
-  
   //drive init
   //motorControl.init();
 
@@ -60,12 +52,12 @@ void loop() {
   //serial_out.println("loop()");
 
   bool val_ok = distWall.read_ToF_mm(dist);
-  if (!val_ok) {
-    serial_out->println("ERROR: read_ToF_mm()");
-  }
+  // if (!val_ok) {
+  //   serial_out->println("ERROR: read_ToF_mm()");
+  // }
   float steer = pidWall.calculations(dist);
   motorControl.normalDrive(50, steer);
-
+  //path.loop();
 #if defined(ARDUINO_ARCH_ESP32)
   serial_out->printf("Dist:%dmm, PID: %f\n", dist, steer);  //debug output for testing
 #else

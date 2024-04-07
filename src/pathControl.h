@@ -10,6 +10,8 @@
 #include "ToF.h"
 #include "PID.h"
 #include "MotorControl.h"
+#include "RuntimeConfig.h"
+#include "PidData.h"
 
 
 class pathControl {
@@ -37,8 +39,8 @@ private:
     ToF backToF_default;
 
 
-    PID pidDefault = PID(KD_PID, KD_PID, KI_PID, 0, false);
-    PID *pid;
+    pid::PID pidDefault = pid::PID(default_pid_trim, 0, false);
+    pid::PID *pid;
     
     MotorControl motorDefault = MotorControl(serial_out);
     MotorControl *motors;
@@ -48,7 +50,7 @@ private:
     uint8_t driveState  = drive_normal;
     float calc_steer = 0;
 public:
-    pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors = nullptr, ToF *_front_ToF = nullptr, ToF *_backToF = nullptr, PID *_pid = nullptr);
+    pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors = nullptr, ToF *_front_ToF = nullptr, ToF *_backToF = nullptr, pid::PID *_pid = nullptr);
     ~pathControl();
 
     uint16_t getDist() const        { return dist; }

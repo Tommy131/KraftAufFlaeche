@@ -1,7 +1,8 @@
 #include "PID.h"
 
+namespace pid {
 
-PID::PID(float P_Gain, float D_Gain, float I_Gain, bool P_Gain_Boost, bool use_avg_on_DGain)
+PID::PID(pid_trim_t& trim, bool P_Gain_Boost, bool use_avg_on_DGain)
     : error(0)
     , PID_output(0) 
     , data_prev(0)
@@ -16,9 +17,10 @@ PID::PID(float P_Gain, float D_Gain, float I_Gain, bool P_Gain_Boost, bool use_a
     , avr_error(0)
     {
     
-    Kp = P_Gain;
-    Kd = D_Gain;
-    Ki = I_Gain;
+    Kp = trim.kp;
+    Ki = trim.ki;
+    Kd = trim.kd;
+    
 
     Kp_boost_activ = P_Gain_Boost;
     use_avg = use_avg_on_DGain;
@@ -69,3 +71,21 @@ void PID::reset(){
     integral = integral_prev = 0;
     PID_output = 0;
 }
+
+void PID::setTrim(pid_trim_t& trim) {
+    Serial.println("Updating the trim");
+    Kp = trim.kp;
+    Ki = trim.ki;
+    Kd = trim.kd;
+}
+
+void PID::printTrim(pid_trim_t& trim) {
+    Serial.println("Updated the configuration to:");
+    Serial.printf(
+        "KP: %f\n"
+        "KI: %f\n"
+        "KD: %f\n", trim.kp, trim.ki, trim.kd
+    );
+}
+
+} // namespace pid

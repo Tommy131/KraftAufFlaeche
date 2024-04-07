@@ -6,10 +6,6 @@
 #define BAUD_SERIAL 115200
 
 
-#define KP_PID 0.5
-#define KI_PID 0.0
-#define KD_PID 0.0
-
 //pathControl
 #define CORNER_THR 5000 //mm //If value is bigger or equal a corner is detected
 #define MAX_SPEED 100   //PERCENT that the controller should aim to meet

@@ -5,6 +5,8 @@
 #include "ToF.h"
 #include "MotorControl.h"
 #include "pathControl.h"
+#include "PidData.h"
+#include "RuntimeConfig.h"
 
 #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
   //Init for SoftSerial
@@ -18,7 +20,7 @@
 //TODO: CONTROL TABLE MAX TORQUE
 
 //Init for PID
-PID pidWall(KP_PID, KD_PID, KI_PID, 0, false);
+pid::PID pidWall(default_pid_trim, 0, false);
 
 //Init ToF
 ToF distWall;
@@ -42,6 +44,14 @@ void setup() {
 
   //PID init
   //pidWall.setpoint = 100.0;
+
+  
+  setOnTrimeUpdateCallback([](pid::pid_trim_t& upd) {
+    pidWall.setTrim(upd);
+    pidWall.printTrim(upd);
+  });
+
+  setupRuntimeConfig();
   
   path.init();
 } // setup

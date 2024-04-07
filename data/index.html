@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>#KraftAufFlaeche</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <h1>Parameters</h1>
+    <form method="get", action="/updateconfig" id="params">
+        <label for="KP_PID">KP_PID</label>
+        <input name="KP_PID" type="number" step="0.01" id="KP_PID" />
+        <br />
+        <label for="KI_PID">KI_PID</label>
+        <input name="KI_PID" type="number" step="0.01" id="KI_PID" />
+        <br />
+        <label for="KD_PID">KD_PID</label>
+        <input name="KD_PID" type="number" step="0.01" id="KD_PID" />
+        <br />
+        <button type="submit">OK</button>
+    </form>
+</body>
+<style>
+
+* {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+#params * {
+    margin: .2em;
+}
+</style>
+<script>
+'use strict';
+const main = async () => {
+    const resp = await fetch('/getconfig');
+    const body = await resp.json();
+    for (const key of Object.keys(body)) {
+        const value = body[key];
+        const el = document.getElementById(key);
+        if (!el) {
+            continue
+        }
+        if (typeof value === 'number') {
+            el.value = value.toFixed(3);
+        }
+    }
+}
+main();
+
+</script>
+</html>

@@ -1,17 +1,23 @@
 #pragma once
 #include <Arduino.h>
+#include "PidData.h"
 
 #define PID_OUTPUT_CONSTRAIN_DEFAULT 100.0
+
+namespace pid {
+
 
 class PID {
 
 public:
-    PID(float P_Gain, float D_Gain, float I_Gain, bool P_Gain_Boost, bool use_avg_on_DGain);
+    PID(pid_trim_t& trim, bool P_Gain_Boost, bool use_avg_on_DGain);
 
     void setGain(float P_Gain, float D_Gain, float I_Gain);
     float calculations(float data);
 
     void reset();
+    void setTrim(pid_trim_t& trim);
+    void printTrim(pid_trim_t& trim);
     float setpoint;
 
     float error;
@@ -48,3 +54,4 @@ private:
     float avr_error;
 };
 
+} // namespace pid

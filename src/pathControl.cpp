@@ -12,7 +12,7 @@
 #include "MotorControl.h"
 
 
-pathControl::pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors, ToF  *_frontToF, ToF *_backToF, PID *_pid){
+pathControl::pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors, ToF  *_frontToF, ToF *_backToF, pid::PID *_pid){
     dist = constrain(_dist, 0, 2000);
 
     if(_motors == nullptr)      motors = &motorDefault;

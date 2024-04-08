@@ -88,4 +88,8 @@ void PID::printTrim(pid_trim_t& trim) {
     );
 }
 
+void PID::setSetPoint(float _setpoint) {
+    setpoint = _setpoint;
+}
+
 } // namespace pid

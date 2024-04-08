@@ -19,6 +19,12 @@
         <label for="KD_PID">KD_PID</label>
         <input name="KD_PID" type="number" step="0.01" id="KD_PID" />
         <br />
+        <label for="SPEED">SPEED</label>
+        <input name="SPEED" type="number" step="1" id="SPEED" />
+        <br />
+        <label for="DISTANCE">DISTANCE</label>
+        <input name="DISTANCE" type="number" step="1" id="DISTANCE" />
+        <br />
         <button type="submit">OK</button>
     </form>
 </body>
@@ -44,7 +50,11 @@ const main = async () => {
             continue
         }
         if (typeof value === 'number') {
-            el.value = value.toFixed(2);
+            if (value % 1) {
+                el.value = value.toFixed(2);
+            } else {
+                el.value = value;
+            }
         }
     }
 }

@@ -29,7 +29,7 @@ ToF backWall;
 //drive
 MotorControl motorControl(serial_out);
 
-pathControl path(100, serial_out, &motorControl, &distWall, &backWall, &pidWall);
+pathControl path(DEFAULT_DISTANCE, serial_out, &motorControl, &distWall, &backWall, &pidWall);
 #ifndef PIO_UNIT_TESTING // for unit testing
 void setup() {
 
@@ -49,6 +49,14 @@ void setup() {
   setOnTrimeUpdateCallback([](pid::pid_trim_t& upd) {
     pidWall.setTrim(upd);
     pidWall.printTrim(upd);
+  });
+
+  setOnSpeedUpdate([](uint8_t speed) {
+    path.setSpeed(speed);
+  });
+
+  setOnDistanceUpdateCallback([](uint16_t distance) {
+    path.setDist(distance);
   });
 
   setupRuntimeConfig();

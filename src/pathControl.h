@@ -31,6 +31,7 @@ private:
     };
 
     uint16_t dist; //in mm
+    uint8_t speed;
 
     ToF *frontToF;
     ToF *backToF;
@@ -54,7 +55,7 @@ public:
     ~pathControl();
 
     uint16_t getDist() const        { return dist; }
-    void setDist(uint16_t _dist)    { dist = constrain(_dist, 0, 2000); }
+    void setDist(uint16_t _dist);
 
     /**
      * @brief startups all uses Objects and sensors
@@ -81,6 +82,11 @@ public:
     */
     uint8_t shortcutCorner();
 
+    /**
+     * @brief set the max. speed for drive
+     * @param _speed speed value
+    */
+    void setSpeed(uint8_t _speed);
 
 
 };

@@ -21,15 +21,22 @@
 #define KEY_KI_PID "KI_PID"
 #define KEY_KD_PID "KD_PID"
 
+#define KEY_DISTANCE "DISTANCE"
+#define KEY_SPEED "SPEED"
+
 #define PREF_RW_MODE false
 #define PREF_RO_MODE true
 #define PREF_DOMAIN "TRIM"
 #define PREF_INITIALIZED "PREF_INITI"
 
-typedef struct {
-    char key[16]; // max length is 15 (by library)
-    float& value;
-} persist_float_pair_t;
+#define MAX_PREF_LEN 15
+
+template <typename T>
+struct persist_pair {
+    char key[MAX_PREF_LEN+1]; // max length is 15 (by library)
+    T& value;
+};
+
 
 
 extern Preferences preferences;
@@ -37,3 +44,5 @@ extern Preferences preferences;
 
 void setupRuntimeConfig();
 void setOnTrimeUpdateCallback(std::function<void(pid::pid_trim_t& updated)> onTrimUpdate);
+void setOnDistanceUpdateCallback(std::function<void(uint16_t distance)> _onDistanceUpdate);
+void setOnSpeedUpdate(std::function<void(uint8_t speed)> _onSpeedUpdate);

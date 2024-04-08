@@ -18,7 +18,12 @@ public:
     void reset();
     void setTrim(pid_trim_t& trim);
     void printTrim(pid_trim_t& trim);
-    float setpoint;
+
+    /**
+     * set setpoint (distance to wall)
+     * @param _setpoint unit from pathControl
+    */
+    void setSetPoint(float setpoint);
 
     float error;
 private:
@@ -27,7 +32,7 @@ private:
     void calcBoostP();
 
     
-
+    float setpoint;
     float Kp;
     float Kd;
     float Ki;

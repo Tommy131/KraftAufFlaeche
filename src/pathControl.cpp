@@ -12,7 +12,9 @@
 #include "MotorControl.h"
 
 
-pathControl::pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors, ToF  *_frontToF, ToF *_backToF, pid::PID *_pid){
+pathControl::pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors, ToF  *_frontToF, ToF *_backToF, pid::PID *_pid)
+    : speed(MAX_SPEED) 
+{
     dist = constrain(_dist, 0, 2000);
 
     if(_motors == nullptr)      motors = &motorDefault;
@@ -38,7 +40,7 @@ uint8_t pathControl::init(){
 
     ret += !motors->init();
 
-    pid->setpoint = dist;
+    pid->setSetPoint(dist);
 
     if(ret == 0) return OUT_CODE_OK;
     return OUT_CODE_ERR;
@@ -134,4 +136,23 @@ uint8_t pathControl::shortcutCorner(){
 
     driveState = drive_normal;
     return OUT_CODE_OK;
+}
+
+
+void pathControl::setSpeed(uint8_t _speed) {
+    Serial.print("Updating speed from: ");
+    Serial.print(speed, DEC);
+    Serial.print("; to ");
+    Serial.println(_speed, DEC);
+    speed = _speed;
+}
+
+
+void pathControl::setDist(uint16_t _dist) { 
+    Serial.print("Updating distance from: ");
+    Serial.print(dist, DEC);
+    Serial.print("; to ");
+    Serial.println(_dist, DEC);
+    dist = constrain(_dist, 0, 2000); 
+    pid->setSetPoint(dist);
 }

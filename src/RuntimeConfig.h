@@ -26,6 +26,10 @@
 #define PREF_DOMAIN "TRIM"
 #define PREF_INITIALIZED "PREF_INITI"
 
+typedef struct {
+    char key[16]; // max length is 15 (by library)
+    float& value;
+} persist_float_pair_t;
 
 
 extern Preferences preferences;

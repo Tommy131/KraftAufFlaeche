@@ -38,6 +38,7 @@ enum outputCode{
     
 
 #define PIN_XSHUT_TOF_1 18 //Pin for the Xshut pin of one of the ToF sensors
+#define ADDRESS_TOF_1 0x29 //Default Address of second ToF chip
 #define ADDRESS_TOF_2 0x60 //Changed Address of second ToF chip
 
 #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino

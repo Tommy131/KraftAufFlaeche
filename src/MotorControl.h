@@ -14,8 +14,8 @@ using namespace ControlTableItem;
 
 
 enum MotorMap{
-    MLeft=1,   //Motor Left with ID
-    MRight=2   //Motor Right with ID
+    MLeft=2,   //Motor Left with ID
+    MRight=1   //Motor Right with ID
 };
 
 

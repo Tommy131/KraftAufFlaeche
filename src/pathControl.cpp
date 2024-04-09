@@ -76,7 +76,7 @@ uint8_t pathControl::loop(){
         } else if (ToF_valid_front) {
             calc_steer = pid->calculations(frontToF->getAvgRange());
         } else {
-            motors->normalDrive(MAX_SPEED / 2, -5); // slow down, and try to get closer to the wall
+            motors->normalDrive(speed / 2, -5); // slow down, and try to get closer to the wall
             return OUT_CODE_NO_TOF_MESS;
         }
 
@@ -87,7 +87,7 @@ uint8_t pathControl::loop(){
         else                            driveState = drive_normal;
 
         //Step 5.
-        motors->normalDrive(MAX_SPEED, calc_steer);
+        motors->normalDrive(speed, calc_steer);
 
         break;
     }
@@ -115,7 +115,7 @@ uint8_t pathControl::checkForCorner(bool frontORback){
 }
 
 uint8_t pathControl::shortcutCorner(){
-    motors->normalDrive(MAX_SPEED, -10);    //TODO TUNING!!!!!
+    motors->normalDrive(speed, -10);    //TODO TUNING!!!!!
     int16_t ret = 0;
     while(ret == OUT_CODE_CORNER) {
         ret = checkForCorner(ID_frontTof);
@@ -130,7 +130,7 @@ uint8_t pathControl::shortcutCorner(){
 
     
         calc_steer = pid->calculations(frontToF->getAvgRange());
-        motors->normalDrive(MAX_SPEED, calc_steer);
+        motors->normalDrive(speed, calc_steer);
 
     }
 
@@ -155,4 +155,30 @@ void pathControl::setDist(uint16_t _dist) {
     Serial.println(_dist, DEC);
     dist = constrain(_dist, 0, 2000); 
     pid->setSetPoint(dist);
+}
+
+float pathControl::estimateAngle(uint16_t dist1_raw, uint16_t dist2_raw){
+    int16_t diff = (int16_t) (dist2_raw - dist1_raw);
+    return atan2(DISTANCE_TOF, diff);
+
+    if(dist1_raw < dist2_raw) {
+        
+    } else {
+        int16_t diff = (int16_t) (dist1_raw - dist2_raw);
+        return (atan2(DISTANCE_TOF, diff) + PI/2);
+    }
+}
+
+uint16_t pathControl::estimateRealDistance(float angle, uint16_t dist_raw){
+    uint16_t dist = (uint16_t) (cos(angle) * dist_raw);
+    return dist;
+}
+
+uint16_t pathControl::calculateDist(uint16_t dist1_raw, uint16_t dist2_raw){
+    float angle = estimateAngle(dist1_raw, dist2_raw);
+    if(dist1_raw < dist2_raw){
+        return estimateRealDistance(angle, dist1_raw);
+    } else {
+        return estimateRealDistance(angle, dist2_raw);
+    }
 }

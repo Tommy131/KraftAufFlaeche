@@ -47,12 +47,12 @@ void setup() {
 
   
   setOnTrimeUpdateCallback([](pid::pid_trim_t& upd) {
-    pidWall.setTrim(upd);
-    pidWall.printTrim(upd);
+    pidWall.setGain(upd);
+    pidWall.printGain(upd);
   });
 
   setOnSpeedUpdate([](uint8_t speed) {
-    path.setSpeed(speed);
+  path.setSpeed(speed);
   });
 
   setOnDistanceUpdateCallback([](uint16_t distance) {
@@ -65,11 +65,17 @@ void setup() {
 } // setup
 
 uint16_t dist = 0;
+uint16_t dist1 = 0;
 
 void loop() {
   //serial_out.println("loop()");
 
   bool val_ok = distWall.read_ToF_mm(dist);
+  val_ok = backWall.read_ToF_mm(dist1);
+
+  float resul = path.estimateAngle(dist, dist1);
+  uint16_t res = path.estimateRealDistance(resul, dist);
+
   // if (!val_ok) {
   //   serial_out->println("ERROR: read_ToF_mm()");
   // }
@@ -84,7 +90,7 @@ void loop() {
   serial_out->print(", PID: ");
   serial_out->println(steer, 4);
 #endif
-
+  serial_out->printf("1: %d, 2: %d, deg: %f, dist: %d\n", dist, dist1, resul*RAD_TO_DEG, res);
   delay(100);
 } // loop
 #endif // PIO_UNIT_TESTING

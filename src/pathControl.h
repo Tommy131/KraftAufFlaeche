@@ -88,6 +88,22 @@ public:
     */
     void setSpeed(uint8_t _speed);
 
+    /**
+     * @brief use both rays of ToF sensors to estimate the current angle the robot has to the wall. 90deg means parallel to the wall.
+     * @return returns the angle in RAD 
+    */
+    float estimateAngle(uint16_t dist1_raw, uint16_t dist2_raw);
 
+    /**
+     * @brief use angle and the distance the wall to calculate real distance
+     * @return return the distance in mm of perpendicular line
+    */
+    uint16_t estimateRealDistance(float angle, uint16_t dist_raw);
+
+    /**
+     * @brief use estimation functions to calculate the real distance from the wall
+     * @return returns distance from wall 
+    */
+    uint16_t calculateDist(uint16_t dist1_raw, uint16_t dist2_raw);
 };
 

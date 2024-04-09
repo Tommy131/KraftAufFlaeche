@@ -20,9 +20,15 @@ uint8_t ToF::init_ToF(int8_t pin_off /* = -1*/, uint8_t changeAdress /* = 0x60*/
     if(pin_off != -1) {
         if(changeAdress == sensor_ToF.I2C_SLAVE_DEVICE_ADDRESS) return OUT_CODE_INVAL_NUM;
         digitalWrite(pin_off, LOW);
+        
+        sensorInit = sensor_ToF.init();
+        if(!sensorInit){
+            sensor_ToF.setAddress(changeAdress);
+        }
     }
     //Wire.setClock(400000);
-    sensorInit = sensor_ToF.init();
+    if(!sensorInit) sensorInit = sensor_ToF.init();
+
     if(!sensorInit) {
         if(pin_off != -1) digitalWrite(pin_off, HIGH);
         return OUT_CODE_ERR;

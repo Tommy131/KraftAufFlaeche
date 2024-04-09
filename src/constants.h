@@ -11,6 +11,16 @@
 #define MAX_SPEED 100   //PERCENT that the controller should aim to meet
 #define DEFAULT_DISTANCE 100
 
+#define DISTANCE_TOF 78.0 //mm //distance between the two sensors
+
+#ifndef DEG_TO_RAD
+    #define DEG_TO_RAD     = (PI/180);
+#endif //DEG_TO_RAD
+#ifndef RAD_TO_DEG
+    #define RAD_TO_DEG     = (1/(PI/180));
+#endif //RAD_TO_DEG
+
+
 //motorControl
 #define MAX_PERCENT 100         //%
 #define RES_MOTOR_BIT 10        

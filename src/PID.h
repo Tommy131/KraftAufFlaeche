@@ -13,11 +13,12 @@ public:
     PID(pid_trim_t& trim, bool P_Gain_Boost, bool use_avg_on_DGain);
 
     void setGain(float P_Gain, float D_Gain, float I_Gain);
+    void setGain(pid_trim_t& trim);
+    void printGain(pid_trim_t& trim);
+
     float calculations(float data);
 
     void reset();
-    void setTrim(pid_trim_t& trim);
-    void printTrim(pid_trim_t& trim);
 
     /**
      * set setpoint (distance to wall)

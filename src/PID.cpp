@@ -33,6 +33,24 @@ void PID::setGain(float P_Gain, float D_Gain, float I_Gain){
     Ki = I_Gain;
 }
 
+
+void PID::setGain(pid_trim_t& trim) {
+    Serial.println("Updating the trim");
+    Kp = trim.kp;
+    Ki = trim.ki;
+    Kd = trim.kd;
+}
+
+void PID::printGain(pid_trim_t& trim) {
+    Serial.println("Updated the configuration to:");
+    Serial.printf(
+        "KP: %f\n"
+        "KI: %f\n"
+        "KD: %f\n", trim.kp, trim.ki, trim.kd
+    );
+}
+
+
 void PID::calcBoostP(){
     if(error < -1 || error > 1){
     Kp_boost = (fabs(error) - 1) / 20;
@@ -70,22 +88,6 @@ void PID::reset(){
     error = error_prev = 0;
     integral = integral_prev = 0;
     PID_output = 0;
-}
-
-void PID::setTrim(pid_trim_t& trim) {
-    Serial.println("Updating the trim");
-    Kp = trim.kp;
-    Ki = trim.ki;
-    Kd = trim.kd;
-}
-
-void PID::printTrim(pid_trim_t& trim) {
-    Serial.println("Updated the configuration to:");
-    Serial.printf(
-        "KP: %f\n"
-        "KI: %f\n"
-        "KD: %f\n", trim.kp, trim.ki, trim.kd
-    );
 }
 
 void PID::setSetPoint(float _setpoint) {

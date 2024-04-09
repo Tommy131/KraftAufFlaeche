@@ -8,7 +8,7 @@
 #include "constants.h"
 
 
-const float tof_q           = 0.3;  //Process Variance - usually a small number between 0.1 - 0.3
+const float tof_q           = 0.8;  //Process Variance - usually a small number between 0.1 - 0.3
 
 
 class ToF {
@@ -17,7 +17,7 @@ public:
     /**
      * @brief constructor
     */
-    ToF();
+    ToF(float _correction);
 
     /**
      * @brief init sensor and starts the continues measurement mode 
@@ -25,7 +25,7 @@ public:
      * @param changeAdress this is the new address with that the sensor should be addressed
      * @return OUT_CODE_ERR and OUT_CODE_OK, OUT_CODE_INVAL_NUM if changeAddress is the same as default
     */
-    uint8_t init_ToF(int8_t PIN_OFF  = -1, uint8_t changeAdress  = ADDRESS_TOF_2);
+    uint8_t init_ToF(int8_t PIN_OFF  = -1, uint8_t changeAdress  = ADDRESS_TOF_1);
 
     /**
      * @brief reads the sensor in an unblocking way and uses a filter to reduce noise.
@@ -40,7 +40,7 @@ public:
     
 
     uint16_t getLastRange() const   { return last_range; }
-    uint16_t getAvgRange() const    { return avg_range; }
+    uint16_t getAvgRange()  const   { return avg_range; }
     bool     getValidRead() const   { return valid_reading; }
 
 
@@ -56,4 +56,6 @@ private:
     uint16_t last_range = 0;    //range from last iteration without filter 
     uint16_t avg_range = 0;     //range after the filter
     bool valid_reading = false; //true if a valid reading is available
+
+    float correction;
 };

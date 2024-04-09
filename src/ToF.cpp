@@ -5,25 +5,27 @@
 #include <Wire.h>
 
 
-ToF::ToF() {
+ToF::ToF(float _correction) {
+    correction = _correction;
 }
 
 
-uint8_t ToF::init_ToF(int8_t pin_off /* = -1*/, uint8_t changeAdress /* = 0x60*/){
-    
+uint8_t ToF::init_ToF(int8_t pin_off /* = -1*/, uint8_t changeAddress /* = 0x29*/){
+    sensorInit = false;
+
     #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
     Wire.begin();
     #elif defined(ARDUINO_ARCH_ESP32)
     Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
     #endif
-    
+
     if(pin_off != -1) {
-        if(changeAdress == sensor_ToF.I2C_SLAVE_DEVICE_ADDRESS) return OUT_CODE_INVAL_NUM;
+        if(changeAddress == ADDRESS_TOF_1) return OUT_CODE_INVAL_NUM;
         digitalWrite(pin_off, LOW);
-        
+
         sensorInit = sensor_ToF.init();
         if(!sensorInit){
-            sensor_ToF.setAddress(changeAdress);
+            sensor_ToF.setAddress(changeAddress);
         }
     }
     //Wire.setClock(400000);
@@ -34,9 +36,10 @@ uint8_t ToF::init_ToF(int8_t pin_off /* = -1*/, uint8_t changeAdress /* = 0x60*/
         return OUT_CODE_ERR;
     }
     if(pin_off != -1) {
-        sensor_ToF.setAddress(changeAdress);
+        sensor_ToF.setAddress(changeAddress);
         digitalWrite(pin_off, HIGH);
     }
+    sensor_ToF.setMeasurementTimingBudget(200000);
     sensor_ToF.startContinuous();
     return OUT_CODE_OK;
 }
@@ -58,7 +61,7 @@ bool ToF::read_ToF_mm(uint16_t& range_in){
         if(!sensorInit)                 valid_reading = false; //do nothing if not init
         else {
             uint16_t temp_range = 0;
-            temp_range = sensor_ToF.readRangeContinuousMillimeters();
+            temp_range = sensor_ToF.readRangeContinuousMillimeters() * correction;
             if(temp_range >= 3000) valid_reading = false; //indicates generally a bad reading(max range 2000mm)
             else {
                 //Serial.print("tempRange: "); Serial.print(temp_range); Serial.print(" avrRange_bev:"); Serial.print(avg_range);
@@ -75,3 +78,8 @@ bool ToF::read_ToF_mm(uint16_t& range_in){
     valid_reading_prev = valid_reading;
     return valid_reading;
 }
+
+/**
+ * 130 -> 117
+ * 80 -> 71
+*/

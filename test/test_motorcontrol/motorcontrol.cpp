@@ -77,7 +77,7 @@ conversion_t test_conversions[] = {
 void test_motor_calc() {
     MotorControl motorctrl(nullptr);
     
-    for (int i = 0; i < (sizeof(test_conversions) / sizeof(conversion_t)); i++) {
+    for (size_t i = 0; i < (sizeof(test_conversions) / sizeof(conversion_t)); i++) {
         conversion_t conv = test_conversions[i];
         const uint16_t m1 = motorctrl.calc_motor_vel(conv.m1.in, true);
         debug_printf("m1 velocity %" PRId16 " -> % " PRIu16 " (expect %" PRIu16 ")", 
@@ -91,7 +91,7 @@ void test_motor_calc() {
     }
 
 }
-
+#ifdef PIO_UNIT_TESTING
 void setup() {
     UNITY_BEGIN();
     RUN_TEST(test_motor_calc);
@@ -99,3 +99,4 @@ void setup() {
 }
 
 void loop() {}
+#endif

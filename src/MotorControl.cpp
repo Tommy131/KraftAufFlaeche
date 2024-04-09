@@ -34,11 +34,11 @@ uint8_t MotorControl::init(){
     for (int i = 1; i < maxServos + 1; i++) {
 
         if(dxl.ping(i)){
-            #ifdef DEBUG_SERVO
+            #if defined(DEBUG_SERVO) && defined(ARDUINO_ARCH_ESP32)
                 serialOut->printf("Successfully found Motor with ID: %i - FW-Ver: %i - Model: %i\n", i, dxl.readControlTableItem(FIRMWARE_VERSION, i), dxl.getModelNumber(i));
-            #endif //DEBUG_SERVO
+            #endif
         } else {
-            #ifdef DEBUG_SERVO
+            #if defined(DEBUG_SERVO) && defined(ARDUINO_ARCH_ESP32)
                 serialOut->printf("Cant find Motor with ID: %i; ABORT START\n", i);
             #endif //DEBUG_SERVO
             return OUT_CODE_ERR_MOTOR;

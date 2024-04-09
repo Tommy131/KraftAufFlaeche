@@ -63,3 +63,4 @@ enum outputCode{
     #define PIN_I2C_SCL 23   //Pin for SCL communication to the sensor(s)
 #endif
 
+#define RUNTIME_CONFIG_ENABLE 1

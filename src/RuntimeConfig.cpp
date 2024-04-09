@@ -1,7 +1,8 @@
 #include "RuntimeConfig.h"
+#include "constants.h"
 
+#if defined(RUNTIME_CONFIG_ENABLE) && defined(ARDUINO_ARCH_ESP32)
 
-#include <ArduinoOTA.h>
 #include <FS.h>
 #include <SPIFFS.h>
 #include <ESPmDNS.h>
@@ -12,7 +13,6 @@
 #include <Preferences.h>
 #include <ArduinoJson.h>
 #include "PidData.h"
-#include "constants.h"
 
 pid::pid_trim_t currentTrim(default_pid_trim);
 int8_t speed = MAX_SPEED;
@@ -229,3 +229,4 @@ void setupRuntimeConfig() {
   onDistanceUpdate(distance);
 }
 
+#endif

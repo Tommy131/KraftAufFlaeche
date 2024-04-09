@@ -1,6 +1,9 @@
 #pragma once
 
-#include <ArduinoOTA.h>
+#include "constants.h"
+
+#if defined(RUNTIME_CONFIG_ENABLE) && defined(ARDUINO_ARCH_ESP32)
+
 #include <FS.h>
 #include <SPIFFS.h>
 #include <ESPmDNS.h>
@@ -37,8 +40,9 @@ struct persist_pair {
     T& value;
 };
 
-
 void setupRuntimeConfig();
 void setOnTrimeUpdateCallback(std::function<void(pid::pid_trim_t& updated)> onTrimUpdate);
 void setOnDistanceUpdateCallback(std::function<void(uint16_t distance)> _onDistanceUpdate);
 void setOnSpeedUpdate(std::function<void(int8_t speed)> _onSpeedUpdate);
+
+#endif

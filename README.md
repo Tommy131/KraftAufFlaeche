@@ -17,4 +17,12 @@ pio check
 
 # run unit tests (for UNO)
 pio test -e unotest -v
+
+# runn unit tests (for kieblitz)
+pio test -e wemos_d1_mini32
+
+# ci commands
+pio ci --board=uno --lib="." --exclude="src/test" .
+pio ci --board=megaatmega2560 --lib="." --exclude="src/test" .
+pio ci --board=wemos_d1_mini32 --lib="." .
 ```

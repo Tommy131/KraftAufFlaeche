@@ -42,12 +42,14 @@ void PID::setGain(pid_trim_t& trim) {
 }
 
 void PID::printGain(pid_trim_t& trim) {
+    #if defined(ARDUINO_ARCH_ESP32)
     Serial.println("Updated the configuration to:");
     Serial.printf(
         "KP: %f\n"
         "KI: %f\n"
         "KD: %f\n", trim.kp, trim.ki, trim.kd
     );
+    #endif
 }
 
 

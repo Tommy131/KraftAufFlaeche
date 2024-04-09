@@ -11,7 +11,12 @@ int debug_printf(const char *fmt,  ...) {
     va_start(args, fmt);
 
     n = vsnprintf(msg, MAX_MSG_LEN-1, fmt, args);
-    TEST_MESSAGE(msg);
+    #if defined(ARDUINO_ARCH_ESP32)
+        TEST_IGNORE_MESSAGE(msg); // only one message possible :(
+    #else
+        TEST_MESSAGE(msg);
+    #endif
+
     va_end(args);
     return n;
 }

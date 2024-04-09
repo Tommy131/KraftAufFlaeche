@@ -45,7 +45,7 @@ void setup() {
   //PID init
   //pidWall.setpoint = 100.0;
 
-  
+  #if defined(RUNTIME_CONFIG_ENABLE) && defined(ARDUINO_ARCH_ESP32)
   setOnTrimeUpdateCallback([](pid::pid_trim_t& upd) {
     pidWall.setGain(upd);
     pidWall.printGain(upd);
@@ -60,6 +60,7 @@ void setup() {
   });
 
   setupRuntimeConfig();
+  #endif
   
   path.init();
 } // setup
@@ -84,13 +85,13 @@ void loop() {
   //path.loop();
 #if defined(ARDUINO_ARCH_ESP32)
   serial_out->printf("Dist:%dmm, PID: %f\n", dist, steer);  //debug output for testing
+  serial_out->printf("1: %d, 2: %d, deg: %f, dist: %d\n", dist, dist1, resul*RAD_TO_DEG, res);
 #else
   serial_out->print("Dist: ");
   serial_out->print(dist, DEC);
   serial_out->print(", PID: ");
   serial_out->println(steer, 4);
 #endif
-  serial_out->printf("1: %d, 2: %d, deg: %f, dist: %d\n", dist, dist1, resul*RAD_TO_DEG, res);
   delay(100);
 } // loop
 #endif // PIO_UNIT_TESTING

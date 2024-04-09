@@ -15,20 +15,20 @@
 #include "constants.h"
 
 pid::pid_trim_t currentTrim(default_pid_trim);
-uint8_t speed = MAX_SPEED;
+int8_t speed = MAX_SPEED;
 uint16_t distance = DEFAULT_DISTANCE;
 
 Preferences preferences;
 
 std::function<void(pid::pid_trim_t& updated)> onTrimUpdate = [](pid::pid_trim_t& u){};
-std::function<void(float distance)> onDistanceUpdate = [](float distance){};
-std::function<void(uint16_t speed)> onSpeedUpdate = [](uint16_t  speed){};
+std::function<void(uint16_t distance)> onDistanceUpdate = [](uint16_t distance){};
+std::function<void(int8_t speed)> onSpeedUpdate = [](int8_t  speed){};
 
 AsyncWebServer server(80);
 
-// uint8_t
-std::function<size_t(const char* name, uint8_t val)> putUint8 = [](const char* name, uint8_t val) { return preferences.putUChar(name, val); };
-std::function<uint8_t(const char* name)> getUint8 = [](const char* name) { return preferences.getUChar(name); };
+// int8_t
+std::function<size_t(const char* name, int8_t val)> putInt8 = [](const char* name, int8_t val) { return preferences.putChar(name, val); };
+std::function<int8_t(const char* name)> getInt8 = [](const char* name) { return preferences.getChar(name); };
 
 // uint16_t
 std::function<size_t(const char* name, uint16_t val)> putUint16 = [](const char* name, uint16_t val) { return preferences.putUShort(name, val); };
@@ -43,8 +43,8 @@ std::function<bool(const char* name)> testValue = [](const char* name) { return 
 
 
 
-std::vector<persist_pair<uint8_t>> settingsUint8 {
-  (persist_pair<uint8_t>) { KEY_SPEED, speed },
+std::vector<persist_pair<int8_t>> settingsInt8 {
+  (persist_pair<int8_t>) { KEY_SPEED, speed },
 };
 
 std::vector<persist_pair<uint16_t>> settingsUint16 {
@@ -66,7 +66,7 @@ void setOnDistanceUpdateCallback(std::function<void(uint16_t distance)> _onDista
   onDistanceUpdate = _onDistanceUpdate;
 }
 
-void setOnSpeedUpdate(std::function<void(uint8_t speed)> _onSpeedUpdate) {
+void setOnSpeedUpdate(std::function<void(int8_t speed)> _onSpeedUpdate) {
   onSpeedUpdate = _onSpeedUpdate;
 }
 
@@ -106,7 +106,7 @@ void readValues(
 
 
 void update_persisted_prefs(Preferences& prefs, pid::pid_trim_t& trim) {
-  writeValues(prefs, settingsUint8, putUint8);
+  writeValues(prefs, settingsInt8, putInt8);
   writeValues(prefs, settingsUint16, putUint16);
   writeValues(prefs, settingsFloat, putFloat);
 
@@ -121,7 +121,7 @@ bool read_persisted_prefs(Preferences& prefs) {
   }
 
   // make sure data is valid
-  if (!check_pairs(prefs, settingsUint8)
+  if (!check_pairs(prefs, settingsInt8)
     || !check_pairs(prefs, settingsUint16)
     || !check_pairs(prefs, settingsFloat))
   {
@@ -129,7 +129,7 @@ bool read_persisted_prefs(Preferences& prefs) {
   }
 
   // read data later
-  readValues(prefs, settingsUint8, getUint8);
+  readValues(prefs, settingsInt8, getInt8);
   readValues(prefs, settingsUint16, getUint16);
   readValues(prefs, settingsFloat, getFloat);
   return true;
@@ -182,7 +182,7 @@ void setupRuntimeConfig() {
   server.on("/getconfig", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     JsonDocument data;
-    addJsonKV(data, settingsUint8);
+    addJsonKV(data, settingsInt8);
     addJsonKV(data, settingsUint16);
     addJsonKV(data, settingsFloat);
     serializeJson(data, *response);
@@ -190,7 +190,7 @@ void setupRuntimeConfig() {
   });
 
   server.on("/updateconfig", HTTP_GET, [](AsyncWebServerRequest *request) {
-    handleIntParam(request, settingsUint8);
+    handleIntParam(request, settingsInt8);
     handleIntParam(request, settingsUint16);
     for (persist_pair<float>& setting : settingsFloat) {
       String val = "";

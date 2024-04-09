@@ -31,7 +31,7 @@ private:
     };
 
     uint16_t dist; //in mm
-    uint8_t speed;
+    int8_t speed;
 
     ToF *frontToF;
     ToF *backToF;
@@ -86,7 +86,7 @@ public:
      * @brief set the max. speed for drive
      * @param _speed speed value
     */
-    void setSpeed(uint8_t _speed);
+    void setSpeed(int8_t _speed);
 
     /**
      * @brief use both rays of ToF sensors to estimate the current angle the robot has to the wall. 90deg means parallel to the wall.

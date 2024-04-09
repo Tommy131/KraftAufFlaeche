@@ -51,7 +51,7 @@ void setup() {
     pidWall.printGain(upd);
   });
 
-  setOnSpeedUpdate([](uint8_t speed) {
+  setOnSpeedUpdate([](int8_t speed) {
   path.setSpeed(speed);
   });
 

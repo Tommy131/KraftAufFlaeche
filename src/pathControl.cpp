@@ -139,7 +139,7 @@ uint8_t pathControl::shortcutCorner(){
 }
 
 
-void pathControl::setSpeed(uint8_t _speed) {
+void pathControl::setSpeed(int8_t _speed) {
     Serial.print("Updating speed from: ");
     Serial.print(speed, DEC);
     Serial.print("; to ");

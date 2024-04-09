@@ -13,7 +13,9 @@
 
 
 pathControl::pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors, ToF  *_frontToF, ToF *_backToF, pid::PID *_pid)
-    : speed(MAX_SPEED) 
+    : speed(MAX_SPEED)
+    , frontToF_default(1.0)
+    , backToF_default(1.0)
 {
     dist = constrain(_dist, 0, 2000);
 
@@ -35,8 +37,8 @@ pathControl::~pathControl(){}
 
 uint8_t pathControl::init(){
     uint8_t ret = 0;
-    if(!frontToF->getInit())    ret += !frontToF->init_ToF(PIN_XSHUT_TOF_1, ADDRESS_TOF_2);
-    if(!backToF->getInit())     ret += !backToF->init_ToF();
+    if(!backToF->getInit())     ret += !backToF->init_ToF(PIN_XSHUT_TOF_1, ADDRESS_TOF_2);
+    if(!frontToF->getInit())    ret += !frontToF->init_ToF();
 
     ret += !motors->init();
 
@@ -160,25 +162,14 @@ void pathControl::setDist(uint16_t _dist) {
 float pathControl::estimateAngle(uint16_t dist1_raw, uint16_t dist2_raw){
     int16_t diff = (int16_t) (dist2_raw - dist1_raw);
     return atan2(DISTANCE_TOF, diff);
-
-    if(dist1_raw < dist2_raw) {
-        
-    } else {
-        int16_t diff = (int16_t) (dist1_raw - dist2_raw);
-        return (atan2(DISTANCE_TOF, diff) + PI/2);
-    }
 }
 
 uint16_t pathControl::estimateRealDistance(float angle, uint16_t dist_raw){
-    uint16_t dist = (uint16_t) (cos(angle) * dist_raw);
+    uint16_t dist = (uint16_t) (sin(angle) * dist_raw);
     return dist;
 }
 
 uint16_t pathControl::calculateDist(uint16_t dist1_raw, uint16_t dist2_raw){
     float angle = estimateAngle(dist1_raw, dist2_raw);
-    if(dist1_raw < dist2_raw){
-        return estimateRealDistance(angle, dist1_raw);
-    } else {
-        return estimateRealDistance(angle, dist2_raw);
-    }
+    return estimateRealDistance(angle, dist1_raw);
 }

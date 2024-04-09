@@ -23,13 +23,13 @@
 pid::PID pidWall(default_pid_trim, 0, false);
 
 //Init ToF
-ToF distWall;
-ToF backWall;
+ToF backWall(0.9);
+ToF frontWall(1.0);
 
 //drive
 MotorControl motorControl(serial_out);
 
-pathControl path(DEFAULT_DISTANCE, serial_out, &motorControl, &distWall, &backWall, &pidWall);
+pathControl path(DEFAULT_DISTANCE, serial_out, &motorControl, &frontWall, &backWall, &pidWall);
 #ifndef PIO_UNIT_TESTING // for unit testing
 void setup() {
 
@@ -62,7 +62,7 @@ void setup() {
   setupRuntimeConfig();
   #endif
   
-  path.init();
+  Serial.printf("PathInitCode(1): %d\n", path.init());
 } // setup
 
 uint16_t dist = 0;
@@ -71,11 +71,11 @@ uint16_t dist1 = 0;
 void loop() {
   //serial_out.println("loop()");
 
-  bool val_ok = distWall.read_ToF_mm(dist);
-  val_ok = backWall.read_ToF_mm(dist1);
+  bool val_ok = backWall.read_ToF_mm(dist1);
+  val_ok = frontWall.read_ToF_mm(dist);
 
   float resul = path.estimateAngle(dist, dist1);
-  uint16_t res = path.estimateRealDistance(resul, dist);
+  uint16_t res = path.calculateDist(dist, dist1);
 
   // if (!val_ok) {
   //   serial_out->println("ERROR: read_ToF_mm()");

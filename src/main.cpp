@@ -61,8 +61,11 @@ void setup() {
 
   setupRuntimeConfig();
   #endif
-  
+
+#if defined(ARDUINO_ARCH_ESP32) 
   Serial.printf("PathInitCode(1): %d\n", path.init());
+#endif
+
 } // setup
 
 uint16_t dist = 0;

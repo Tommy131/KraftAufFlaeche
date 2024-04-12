@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "DummySerial.h"
 
 #pragma once
 
@@ -42,17 +43,10 @@ enum outputCode{
 #define ADDRESS_TOF_2 0x60 //Changed Address of second ToF chip
 
 #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
-    #include <SoftwareSerial.h>
-    typedef SoftwareSerial SerialType;
-
     #define SOFT_DEBUG_RX 9
     #define SOFT_DEBUG_TX 10
 
 #elif defined(ARDUINO_ARCH_ESP32)
-    typedef HardwareSerial SerialType ;
-
-    #define DXL_SERIAL Serial1  
-
     #define PIN_TX_DXL 22   // Pin for Tx communication to the Dynamixel
     #define PIN_RX_DXL 21   // Pin for Rx communication to the Dynamixel
     #define PIN_SW_DXL 16   // Pin for the switching between TX/RX
@@ -62,6 +56,16 @@ enum outputCode{
 
     #define PIN_I2C_SDA 19   //Pin for SDA communication to the sensor(s)
     #define PIN_I2C_SCL 23   //Pin for SCL communication to the sensor(s)
+#endif
+
+#if defined(PIO_UNIT_TESTING)
+    typedef DummySerial SerialType;
+#elif defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
+    #include <SoftwareSerial.h>
+    typedef SoftwareSerial SerialType;
+#elif defined(ARDUINO_ARCH_ESP32)
+    typedef HardwareSerial SerialType;
+    #define DXL_SERIAL Serial1
 #endif
 
 #define RUNTIME_CONFIG_ENABLE 1

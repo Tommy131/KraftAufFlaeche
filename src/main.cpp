@@ -7,8 +7,11 @@
 #include "pathControl.h"
 #include "PidData.h"
 #include "RuntimeConfig.h"
+#include "DummySerial.h"
 
-#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
+#if defined(PIO_UNIT_TESTING)
+  DummySerial serial_out;
+#elif defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
   //Init for SoftSerial
   #include <SoftwareSerial.h>
   SoftwareSerial sw_serial_out(SOFT_DEBUG_RX, SOFT_DEBUG_TX); // DYNAMIXELShield UART RX/TX

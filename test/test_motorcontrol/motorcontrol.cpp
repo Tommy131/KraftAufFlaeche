@@ -4,6 +4,7 @@
 #include "MotorControl.h"
 #include "../debugprint.h"
 #include "ToF.h"
+#include "DummySerial.h"
 
 
 void setUp(void) {}
@@ -75,7 +76,8 @@ conversion_t test_conversions[] = {
 
 
 void test_motor_calc() {
-    MotorControl motorctrl(nullptr);
+    DummySerial dummy_serial;
+    MotorControl motorctrl(dummy_serial);
     
     for (size_t i = 0; i < (sizeof(test_conversions) / sizeof(conversion_t)); i++) {
         conversion_t conv = test_conversions[i];

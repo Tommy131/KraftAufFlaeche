@@ -30,6 +30,11 @@ ToF frontWall(1.0);
 MotorControl motorControl(serial_out);
 
 pathControl path(DEFAULT_DISTANCE, serial_out, &motorControl, &frontWall, &backWall, &pidWall);
+
+#if defined(RUNTIME_CONFIG_ENABLE) && defined(ARDUINO_ARCH_ESP32)
+runtimeconfig::RuntimeConfig runtimeConfig(serial_out);
+#endif
+
 #ifndef PIO_UNIT_TESTING // for unit testing
 void setup() {
 
@@ -46,24 +51,24 @@ void setup() {
   //pidWall.setpoint = 100.0;
 
   #if defined(RUNTIME_CONFIG_ENABLE) && defined(ARDUINO_ARCH_ESP32)
-  setOnTrimeUpdateCallback([](pid::pid_trim_t& upd) {
+  runtimeConfig.setOnTrimeUpdateCallback([](pid::pid_trim_t& upd) {
     pidWall.setGain(upd);
     pidWall.printGain(upd);
   });
 
-  setOnSpeedUpdate([](int8_t speed) {
+  runtimeConfig.setOnSpeedUpdate([](int8_t speed) {
   path.setSpeed(speed);
   });
 
-  setOnDistanceUpdateCallback([](uint16_t distance) {
+  runtimeConfig.setOnDistanceUpdateCallback([](uint16_t distance) {
     path.setDist(distance);
   });
 
-  setupRuntimeConfig();
+  runtimeConfig.setupRuntimeConfig();
   #endif
 
 #if defined(ARDUINO_ARCH_ESP32) 
-  Serial.printf("PathInitCode(1): %d\n", path.init());
+  serial_out.printf("PathInitCode(1): %d\n", path.init());
 #endif
 
 } // setup

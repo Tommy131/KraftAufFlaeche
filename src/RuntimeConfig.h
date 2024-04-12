@@ -12,6 +12,7 @@
 #include <ESPAsyncWebServer.h>
 #include <SPIFFSEditor.h>
 #include <Preferences.h>
+#include <Preferences.h>
 #include <ArduinoJson.h>
 
 #include "PidData.h"
@@ -34,15 +35,97 @@
 
 #define MAX_PREF_LEN 15
 
+namespace runtimeconfig {
+
 template <typename T>
 struct persist_pair {
     char key[MAX_PREF_LEN+1]; // max length is 15 (by library)
     T& value;
 };
 
-void setupRuntimeConfig();
-void setOnTrimeUpdateCallback(std::function<void(pid::pid_trim_t& updated)> onTrimUpdate);
-void setOnDistanceUpdateCallback(std::function<void(uint16_t distance)> _onDistanceUpdate);
-void setOnSpeedUpdate(std::function<void(int8_t speed)> _onSpeedUpdate);
+class RuntimeConfig {
+
+public:
+    RuntimeConfig(SerialType& _debug_serial);
+
+    void setupRuntimeConfig();
+    void setOnTrimeUpdateCallback(std::function<void(pid::pid_trim_t& updated)> onTrimUpdate);
+    void setOnDistanceUpdateCallback(std::function<void(uint16_t distance)> _onDistanceUpdate);
+    void setOnSpeedUpdate(std::function<void(int8_t speed)> _onSpeedUpdate);
+private:
+    SerialType& debug_serial;
+
+    std::function<void(pid::pid_trim_t& updated)> onTrimUpdate = [](pid::pid_trim_t& u){};
+    std::function<void(uint16_t distance)> onDistanceUpdate = [](uint16_t distance){};
+    std::function<void(int8_t speed)> onSpeedUpdate = [](int8_t  speed){};
+
+
+    // int8_t
+    std::function<size_t(const char* name, int8_t val)> putInt8 = [&](const char* name, int8_t val) { return preferences.putChar(name, val); };
+    std::function<int8_t(const char* name)> getInt8 = [&](const char* name) { return preferences.getChar(name); };
+
+    // uint16_t
+    std::function<size_t(const char* name, uint16_t val)> putUint16 = [&](const char* name, uint16_t val) { return preferences.putUShort(name, val); };
+    std::function<uint16_t(const char* name)> getUint16 = [&](const char* name) { return preferences.getUShort(name); };
+
+    // float
+    std::function<size_t(const char* name, float val)> putFloat = [&](const char* name, float val) { return preferences.putFloat(name, val); };
+    std::function<float(const char* name)> getFloat = [&](const char* name) { return preferences.getFloat(name); };
+
+    // generic
+    std::function<bool(const char* name)> testValue = [&](const char* name) { return preferences.isKey(name); };
+
+
+    std::vector<persist_pair<int8_t>> settingsInt8 {
+        (persist_pair<int8_t>) { KEY_SPEED, speed },
+    };
+
+    std::vector<persist_pair<uint16_t>> settingsUint16 {
+        (persist_pair<uint16_t>) { KEY_DISTANCE, distance },
+    };
+
+    std::vector<persist_pair<float>> settingsFloat {
+        (persist_pair<float>)  { KEY_KP_PID, currentTrim.kp },
+        (persist_pair<float>) { KEY_KI_PID, currentTrim.ki },
+        (persist_pair<float>) { KEY_KD_PID, currentTrim.kd },
+    };
+
+
+    template <typename T>
+    bool check_pairs(Preferences& prefs, std::vector<persist_pair<T>>& pairs);
+
+    template <typename T>
+    void writeValues(
+        Preferences& prefs,
+        std::vector<persist_pair<T>>& pairs,
+        std::function<size_t(const char* name, T val)> valSetter);
+
+    template <typename T>
+    void readValues(
+        Preferences& prefs,
+        std::vector<persist_pair<T>>& pairs,
+        std::function<T(const char* name)> valGetter);
+
+    template <typename T>
+    void addJsonKV(JsonDocument& data, std::vector<persist_pair<T>>& pairs);
+
+    template <typename T>
+    void handleIntParam(AsyncWebServerRequest *request, std::vector<persist_pair<T>>& pairs);
+
+    void update_persisted_prefs(Preferences& prefs, pid::pid_trim_t& trim);
+    bool read_persisted_prefs(Preferences& prefs);
+    void init_persisted_prefs(Preferences& prefs);
+
+
+    pid::pid_trim_t currentTrim;
+    int8_t speed = MAX_SPEED;
+    uint16_t distance = DEFAULT_DISTANCE;
+
+    Preferences preferences;
+    AsyncWebServer server;
+
+};
+
+} // runtimeconfig
 
 #endif

@@ -10,12 +10,13 @@
 // This namespace is required to use Control table item names
 using namespace ControlTableItem;
 
-MotorControl::MotorControl(SerialType *_serialOut) 
+MotorControl::MotorControl(SerialType& serialDebug) : 
+            serialOut(serialDebug)
     #if defined(ARDUINO_ARCH_ESP32)
-            : dxl(DXL_SERIAL, PIN_SW_DXL)
+            , dxl(DXL_SERIAL, PIN_SW_DXL)
     #endif
                     {
-    serialOut = _serialOut;
+
 }
 
 MotorControl::~MotorControl() {
@@ -35,11 +36,11 @@ uint8_t MotorControl::init(){
 
         if(dxl.ping(i)){
             #if defined(DEBUG_SERVO) && defined(ARDUINO_ARCH_ESP32)
-                serialOut->printf("Successfully found Motor with ID: %i - FW-Ver: %i - Model: %i\n", i, dxl.readControlTableItem(FIRMWARE_VERSION, i), dxl.getModelNumber(i));
+                serialOut.printf("Successfully found Motor with ID: %i - FW-Ver: %i - Model: %i\n", i, dxl.readControlTableItem(FIRMWARE_VERSION, i), dxl.getModelNumber(i));
             #endif
         } else {
             #if defined(DEBUG_SERVO) && defined(ARDUINO_ARCH_ESP32)
-                serialOut->printf("Cant find Motor with ID: %i; ABORT START\n", i);
+                serialOut.printf("Cant find Motor with ID: %i; ABORT START\n", i);
             #endif //DEBUG_SERVO
             return OUT_CODE_ERR_MOTOR;
         }
@@ -49,8 +50,8 @@ uint8_t MotorControl::init(){
         ret += !dxl.torqueOn(i);
         if(ret != 0) {
             #ifdef DEBUG_SERVO
-                serialOut->print("ERROR ON INIT with ID: ");
-                serialOut->println(i);
+                serialOut.print("ERROR ON INIT with ID: ");
+                serialOut.println(i);
             #endif //DEBUG_SERVO
             return OUT_CODE_ERR_MOTOR;    
         }

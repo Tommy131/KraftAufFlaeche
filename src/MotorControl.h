@@ -26,7 +26,7 @@ private:
     DynamixelShield dxl;
 
     const float DXL_PROTOCOL_VERSION = 1.0; // important, our motors are 1.0
-    SerialType *serialOut;
+    SerialType& serialOut;
 
     const uint8_t maxServos = 2;
     const uint32_t baudServos = 1000000; // important, our motors are 1M
@@ -35,7 +35,7 @@ private:
     const uint8_t trim_motor = 0; 
 
 public:
-    MotorControl(SerialType *_softSerial);
+    MotorControl(SerialType& serialDebug);
     ~MotorControl();
 
 

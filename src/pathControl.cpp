@@ -12,10 +12,11 @@
 #include "MotorControl.h"
 
 
-pathControl::pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors, ToF  *_frontToF, ToF *_backToF, pid::PID *_pid)
+pathControl::pathControl(uint16_t _dist, SerialType& _serial_out, MotorControl *_motors, ToF  *_frontToF, ToF *_backToF, pid::PID *_pid)
     : speed(MAX_SPEED)
     , frontToF_default(1.0)
     , backToF_default(1.0)
+    , serial_out(_serial_out)
 {
     dist = constrain(_dist, 0, 2000);
 
@@ -142,19 +143,19 @@ uint8_t pathControl::shortcutCorner(){
 
 
 void pathControl::setSpeed(int8_t _speed) {
-    Serial.print("Updating speed from: ");
-    Serial.print(speed, DEC);
-    Serial.print("; to ");
-    Serial.println(_speed, DEC);
+    serial_out.print("Updating speed from: ");
+    serial_out.print(speed, DEC);
+    serial_out.print("; to ");
+    serial_out.println(_speed, DEC);
     speed = _speed;
 }
 
 
 void pathControl::setDist(uint16_t _dist) { 
-    Serial.print("Updating distance from: ");
-    Serial.print(dist, DEC);
-    Serial.print("; to ");
-    Serial.println(_dist, DEC);
+    serial_out.print("Updating distance from: ");
+    serial_out.print(dist, DEC);
+    serial_out.print("; to ");
+    serial_out.println(_dist, DEC);
     dist = constrain(_dist, 0, 2000); 
     pid->setSetPoint(dist);
 }

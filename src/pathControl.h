@@ -46,12 +46,12 @@ private:
     MotorControl motorDefault = MotorControl(serial_out);
     MotorControl *motors;
 
-    SerialType *serial_out;
+    SerialType& serial_out;
 
     uint8_t driveState  = drive_normal;
     float calc_steer = 0;
 public:
-    pathControl(uint16_t _dist, SerialType *_serial_out, MotorControl *_motors = nullptr, ToF *_front_ToF = nullptr, ToF *_backToF = nullptr, pid::PID *_pid = nullptr);
+    pathControl(uint16_t _dist, SerialType& _serial_out, MotorControl *_motors = nullptr, ToF *_front_ToF = nullptr, ToF *_backToF = nullptr, pid::PID *_pid = nullptr);
     ~pathControl();
 
     uint16_t getDist() const        { return dist; }

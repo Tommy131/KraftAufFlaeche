@@ -12,9 +12,9 @@
   //Init for SoftSerial
   #include <SoftwareSerial.h>
   SoftwareSerial sw_serial_out(SOFT_DEBUG_RX, SOFT_DEBUG_TX); // DYNAMIXELShield UART RX/TX
-  #define serial_out (&sw_serial_out)
+  #define serial_out (sw_serial_out)
 #elif defined(ARDUINO_ARCH_ESP32)
-  HardwareSerial* serial_out = &Serial;
+  HardwareSerial& serial_out = Serial;
 #endif
 
 //TODO: CONTROL TABLE MAX TORQUE
@@ -33,8 +33,8 @@ pathControl path(DEFAULT_DISTANCE, serial_out, &motorControl, &frontWall, &backW
 #ifndef PIO_UNIT_TESTING // for unit testing
 void setup() {
 
-  serial_out->begin(BAUD_SERIAL);
-  serial_out->println("Setting up...");
+  serial_out.begin(BAUD_SERIAL);
+  serial_out.println("Setting up...");
   
   pinMode(PIN_XSHUT_TOF_1, OUTPUT);
   digitalWrite(PIN_XSHUT_TOF_1, HIGH);
@@ -81,19 +81,19 @@ void loop() {
   uint16_t res = path.calculateDist(dist, dist1);
 
   // if (!val_ok) {
-  //   serial_out->println("ERROR: read_ToF_mm()");
+  //   serial_out.println("ERROR: read_ToF_mm()");
   // }
   float steer = pidWall.calculations(dist);
   motorControl.normalDrive(50, steer);
   //path.loop();
 #if defined(ARDUINO_ARCH_ESP32)
-  serial_out->printf("Dist:%dmm, PID: %f\n", dist, steer);  //debug output for testing
-  serial_out->printf("1: %d, 2: %d, deg: %f, dist: %d\n", dist, dist1, resul*RAD_TO_DEG, res);
+  serial_out.printf("Dist:%dmm, PID: %f\n", dist, steer);  //debug output for testing
+  serial_out.printf("1: %d, 2: %d, deg: %f, dist: %d\n", dist, dist1, resul*RAD_TO_DEG, res);
 #else
-  serial_out->print("Dist: ");
-  serial_out->print(dist, DEC);
-  serial_out->print(", PID: ");
-  serial_out->println(steer, 4);
+  serial_out.print("Dist: ");
+  serial_out.print(dist, DEC);
+  serial_out.print(", PID: ");
+  serial_out.println(steer, 4);
 #endif
   delay(100);
 } // loop

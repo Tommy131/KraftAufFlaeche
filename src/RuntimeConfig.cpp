@@ -195,6 +195,6 @@ void RuntimeConfig::setupRuntimeConfig() {
   onDistanceUpdate(distance);
 }
 
-#endif
-
 } // runtimeconfig
+
+#endif

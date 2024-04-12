@@ -74,6 +74,7 @@ conversion_t test_conversions[] = {
     },
 };
 
+#ifdef PIO_UNIT_TESTING
 
 void test_motor_calc() {
     DummySerial dummy_serial;
@@ -93,7 +94,7 @@ void test_motor_calc() {
     }
 
 }
-#ifdef PIO_UNIT_TESTING
+
 void setup() {
     UNITY_BEGIN();
     RUN_TEST(test_motor_calc);

@@ -29,15 +29,19 @@ private:
         ID_frontTof    = 0,
         ID_backToF     = 1,
     };
-
+    
+    SerialType& serial_out;
+    
     uint16_t dist; //in mm
     int8_t speed;
+
+    ToF frontToF_default;
+    ToF backToF_default;
 
     ToF *frontToF;
     ToF *backToF;
     
-    ToF frontToF_default;
-    ToF backToF_default;
+
 
     uint32_t lastMS;
     const uint32_t loopIntervalTime = 50; //ms //interval of loop()
@@ -51,7 +55,7 @@ private:
     MotorControl motorDefault = MotorControl(serial_out);
     MotorControl *motors;
 
-    SerialType& serial_out;
+    
 
     uint16_t real_ToF_dist;
     float rotation;

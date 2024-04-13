@@ -105,7 +105,10 @@ outputCode pathControl::loop(){
             else                            driveState = drive_normal;
 
             //Step 5.
-            serial_out.printf("speed:%d, dist: %dmm, rot:%.2f PID: %f, driveState:%d\n", speed, real_ToF_dist, rotation*RAD_TO_DEG, calc_steer, driveState);  //debug output for testing
+
+            #if defined(ARDUINO_ARCH_ESP32)
+                serial_out.printf("speed:%d, dist: %dmm, rot:%.2f PID: %f, driveState:%d\n", speed, real_ToF_dist, rotation*RAD_TO_DEG, calc_steer, driveState);  //debug output for testing
+            #endif
             motors->normalDrive(speed, calc_steer);
 
             break;

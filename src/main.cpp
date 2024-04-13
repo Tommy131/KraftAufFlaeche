@@ -75,7 +75,7 @@ void setup() {
   serial_out.printf("PathInitCode(1): %d\n", path.init());
   while (touchRead(PIN_TOUCH) >= TOUCH_THR); //Wait for start Signal
 
-#elif
+#else
   serial_out.print("PathInitCode(1): ");
   serial_out.println(path.init());
 #endif
@@ -88,7 +88,10 @@ void setup() {
 void loop() {
 
   path.loop();
-  runtimeConfig.loopRuntimeConfig();
+  
+  #if defined(RUNTIME_CONFIG_ENABLE) && defined(ARDUINO_ARCH_ESP32)
+    runtimeConfig.loopRuntimeConfig();
+  #endif
 
 } // loop
 #endif // PIO_UNIT_TESTING

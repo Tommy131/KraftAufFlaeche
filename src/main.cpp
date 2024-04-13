@@ -24,7 +24,7 @@
 //TODO: CONTROL TABLE MAX TORQUE
 
 //Init for PID
-pid::PID pidWall(default_pid_trim, 0, false);
+pid::PID pidWall(default_pid_trim, 0, false, serial_out);
 
 //Init ToF
 ToF backWall(0.9);

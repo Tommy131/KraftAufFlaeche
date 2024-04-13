@@ -40,7 +40,7 @@ private:
     ToF backToF_default;
 
 
-    pid::PID pidDefault = pid::PID(default_pid_trim, 0, false);
+    pid::PID pidDefault = pid::PID(default_pid_trim, 0, false, serial_out);
     pid::PID *pid;
     
     MotorControl motorDefault = MotorControl(serial_out);

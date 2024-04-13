@@ -25,7 +25,7 @@ public:
      * @param changeAdress this is the new address with that the sensor should be addressed
      * @return OUT_CODE_ERR and OUT_CODE_OK, OUT_CODE_INVAL_NUM if changeAddress is the same as default
     */
-    uint8_t init_ToF(int8_t PIN_OFF  = -1, uint8_t changeAdress  = ADDRESS_TOF_1);
+    outputCode init_ToF(int8_t PIN_OFF  = -1, uint8_t changeAdress  = ADDRESS_TOF_1);
 
     /**
      * @brief reads the sensor in an unblocking way and uses a filter to reduce noise.

@@ -61,26 +61,26 @@ public:
      * @brief startups all uses Objects and sensors
      * @return bool value if init was successful ('true' if successful) 
     */
-    uint8_t init();
+    bool init();
 
     /**
      * @brief complete what should be done in one loop 
      * @return outputs output codes defined in enum outputCode (constants.h)
     */
-    uint8_t loop();
+    outputCode loop();
 
     /**
      * @brief checks ToF sensor for occurrence of a corner in the control surface
      * @param frontORback takes the enum ID_ToFSensor to select the to be evaluated sensor
      * @return outputs output codes defined in enum outputCode (constants.h) [OUT_CODE_OK, OUT_CODE_CORNER, OUT_CODE_NO_TOF_MESS]
     */
-    uint8_t checkForCorner(bool frontORback);
+    outputCode checkForCorner(bool frontORback);
 
     /**
      * @brief executes a shortcut maneuver to shortcut corners 
      * @return outputs output codes defined in enum outputCode (constants.h) [OUT_CODE_OK, OUT_CODE_ERR]
     */
-    uint8_t shortcutCorner();
+    outputCode shortcutCorner();
 
     /**
      * @brief set the max. speed for drive

@@ -36,7 +36,7 @@ pathControl::pathControl(uint16_t _dist, SerialType& _serial_out, MotorControl *
 pathControl::~pathControl(){}
 
 
-uint8_t pathControl::init(){
+bool pathControl::init(){
     uint8_t ret = 0;
     if(!backToF->getInit())     ret += !backToF->init_ToF(PIN_XSHUT_TOF_1, ADDRESS_TOF_2);
     if(!frontToF->getInit())    ret += !frontToF->init_ToF();
@@ -45,12 +45,12 @@ uint8_t pathControl::init(){
 
     pid->setSetPoint(dist);
 
-    if(ret == 0) return OUT_CODE_OK;
-    return OUT_CODE_ERR;
+    if(ret == 0) return true;
+    return false;
 }
 
 
-uint8_t pathControl::loop(){
+outputCode pathControl::loop(){
     /**
      * 1. Check Sensors
      * 2. check for special action(shortcutCorner)
@@ -85,7 +85,7 @@ uint8_t pathControl::loop(){
 
         //Step 4.
         int16_t ret = checkForCorner(ID_frontTof);
-        if(ret == OUT_CODE_NO_TOF_MESS) return ret;
+        if(ret == OUT_CODE_NO_TOF_MESS) return OUT_CODE_NO_TOF_MESS;
         else if(ret == OUT_CODE_CORNER) driveState = drive_corner;
         else                            driveState = drive_normal;
 
@@ -98,7 +98,7 @@ uint8_t pathControl::loop(){
     return OUT_CODE_OK;
 }
 
-uint8_t pathControl::checkForCorner(bool frontORback){
+outputCode pathControl::checkForCorner(bool frontORback){
     //TODO: More Sophisticated?
     ToF *readToF = backToF;
     ToF *secToF = frontToF; 
@@ -117,19 +117,19 @@ uint8_t pathControl::checkForCorner(bool frontORback){
     return OUT_CODE_NO_TOF_MESS;
 }
 
-uint8_t pathControl::shortcutCorner(){
+outputCode pathControl::shortcutCorner(){
     motors->normalDrive(speed, -10);    //TODO TUNING!!!!!
     int16_t ret = 0;
     while(ret == OUT_CODE_CORNER) {
         ret = checkForCorner(ID_frontTof);
-        if(ret == OUT_CODE_NO_TOF_MESS) return ret;
+        if(ret == OUT_CODE_NO_TOF_MESS) return OUT_CODE_NO_TOF_MESS;
     }
 
     ret = 0;
     pid->reset();
     while(ret == OUT_CODE_CORNER) {
         ret = checkForCorner(ID_backToF);
-        if(ret == OUT_CODE_NO_TOF_MESS) return ret;
+        if(ret == OUT_CODE_NO_TOF_MESS) return OUT_CODE_NO_TOF_MESS;
 
     
         calc_steer = pid->calculations(frontToF->getAvgRange());

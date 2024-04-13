@@ -10,7 +10,7 @@ ToF::ToF(float _correction) {
 }
 
 
-uint8_t ToF::init_ToF(int8_t pin_off /* = -1*/, uint8_t changeAddress /* = 0x29*/){
+outputCode ToF::init_ToF(int8_t pin_off /* = -1*/, uint8_t changeAddress /* = 0x29*/){
     sensorInit = false;
 
     #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino

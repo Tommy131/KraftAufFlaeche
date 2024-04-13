@@ -23,7 +23,7 @@ MotorControl::~MotorControl() {
 
 }
 
-uint8_t MotorControl::init(){
+outputCode MotorControl::init(){
 
     //DXL Init
     dxl.begin(baudServos);

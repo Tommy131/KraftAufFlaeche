@@ -43,7 +43,7 @@ public:
      * @brief Initialises all motors and checks there Existence
      * @return returns output code either OUT_CODE_OK or OUT_ERR_MOTOR  
     */
-    uint8_t init();
+    outputCode init();
 
     /**
      * @brief Normal driving mode, with extra features vel=0 equals rotating on the spot

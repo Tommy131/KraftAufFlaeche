@@ -12,8 +12,8 @@
 #include <ESPAsyncWebServer.h>
 #include <SPIFFSEditor.h>
 #include <Preferences.h>
-#include <Preferences.h>
 #include <ArduinoJson.h>
+#include <DNSServer.h>
 
 #include "PidData.h"
 
@@ -46,7 +46,7 @@ struct persist_pair {
 class RuntimeConfig {
 
 public:
-    RuntimeConfig(SerialType& _debug_serial);
+    RuntimeConfig(SerialType& _debug_serial, DNSServer& dns);
 
     void setupRuntimeConfig();
     void setOnTrimeUpdateCallback(std::function<void(pid::pid_trim_t& updated)> onTrimUpdate);
@@ -123,6 +123,7 @@ private:
 
     Preferences preferences;
     AsyncWebServer server;
+    DNSServer& dnsServer;
 
 };
 

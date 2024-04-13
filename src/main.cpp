@@ -17,6 +17,7 @@
   SoftwareSerial sw_serial_out(SOFT_DEBUG_RX, SOFT_DEBUG_TX); // DYNAMIXELShield UART RX/TX
   #define serial_out (sw_serial_out)
 #elif defined(ARDUINO_ARCH_ESP32)
+  #include <DNSServer.h>
   HardwareSerial& serial_out = Serial;
 #endif
 
@@ -35,7 +36,8 @@ MotorControl motorControl(serial_out);
 pathControl path(DEFAULT_DISTANCE, serial_out, &motorControl, &frontWall, &backWall, &pidWall);
 
 #if defined(RUNTIME_CONFIG_ENABLE) && defined(ARDUINO_ARCH_ESP32)
-runtimeconfig::RuntimeConfig runtimeConfig(serial_out);
+DNSServer dns;
+runtimeconfig::RuntimeConfig runtimeConfig(serial_out, dns);
 #endif
 
 #ifndef PIO_UNIT_TESTING // for unit testing
@@ -97,6 +99,7 @@ void loop() {
 #if defined(ARDUINO_ARCH_ESP32)
   serial_out.printf("Dist:%dmm, PID: %f\n", dist, steer);  //debug output for testing
   serial_out.printf("1: %d, 2: %d, deg: %f, dist: %d\n", dist, dist1, resul*RAD_TO_DEG, res);
+  dns.processNextRequest();
 #else
   serial_out.print("Dist: ");
   serial_out.print(dist, DEC);

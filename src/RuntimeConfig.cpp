@@ -12,13 +12,14 @@
 #include <SPIFFSEditor.h>
 #include <Preferences.h>
 #include <ArduinoJson.h>
+#include <DNSServer.h>
 #include "PidData.h"
 
 
 namespace runtimeconfig {
 
-RuntimeConfig::RuntimeConfig(SerialType& _debug_serial) :
-  server(80), preferences(), currentTrim(default_pid_trim), debug_serial(_debug_serial)
+RuntimeConfig::RuntimeConfig(SerialType& _debug_serial, DNSServer& dns) :
+  server(80), preferences(), currentTrim(default_pid_trim), debug_serial(_debug_serial), dnsServer(dns)
 {
 
 }
@@ -132,8 +133,23 @@ void RuntimeConfig::handleIntParam(AsyncWebServerRequest *request, std::vector<p
 }
 
 void RuntimeConfig::setupRuntimeConfig() {
+
+  IPAddress espIp(192, 168, 4, 1);
+  IPAddress espGw(192, 168, 4, 1);
+  IPAddress espSN(255, 255, 255, 0); // /24
+
   WiFi.mode(WIFI_AP);
+  WiFi.softAPConfig(espIp, espGw, espSN);
   WiFi.softAP(SSID, PSK);
+
+	dnsServer.setTTL(3600);
+  
+	const bool dnsOk = dnsServer.start(53, "*", espIp);
+  if (!dnsOk) {
+    debug_serial.println("Failed to setup DNS");
+  } else {
+    debug_serial.println("Started DNS successfully");
+  }
 
   preferences.begin(PREF_DOMAIN, PREF_RW_MODE);
   SPIFFS.begin();

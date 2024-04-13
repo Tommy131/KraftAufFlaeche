@@ -19,14 +19,18 @@
 namespace runtimeconfig {
 
 RuntimeConfig::RuntimeConfig(SerialType& _debug_serial, DNSServer& dns) :
-  server(80), preferences(), currentTrim(default_pid_trim), debug_serial(_debug_serial), dnsServer(dns)
+  server(80), preferences(), currentGainDist(default_pid_trim), currentGainAngle(default_pid_angle_trim), debug_serial(_debug_serial), dnsServer(dns)
 {
 
 }
 
 
-void RuntimeConfig::setOnTrimeUpdateCallback(std::function<void(pid::pid_trim_t& updated)> _onTrimUpdate) {
+void RuntimeConfig::setOnGainDistUpdateCallback(std::function<void(pid::pid_trim_t& updated)> _onTrimUpdate) {
     onTrimUpdate = _onTrimUpdate;
+}
+
+void RuntimeConfig::setOnGainAngleUpdateCallback(std::function<void(pid::pid_trim_t& updated)> _onTrimUpdate) {
+    onTrimAngleUpdate = _onTrimUpdate;
 }
 
 void RuntimeConfig::setOnDistanceUpdateCallback(std::function<void(uint16_t distance)> _onDistanceUpdate) {
@@ -185,9 +189,10 @@ void RuntimeConfig::setupRuntimeConfig() {
 
       }
     }
-    update_persisted_prefs(preferences, currentTrim);
+    update_persisted_prefs(preferences, currentGainDist);
     request->redirect("/");
-    onTrimUpdate(currentTrim);
+    onTrimUpdate(currentGainDist);
+    onTrimAngleUpdate(currentGainAngle);
     onSpeedUpdate(speed);
     onDistanceUpdate(distance);
   });
@@ -206,7 +211,8 @@ void RuntimeConfig::setupRuntimeConfig() {
   debug_serial.println("HTTP server started");
 
   init_persisted_prefs(preferences);
-  onTrimUpdate(currentTrim);
+  onTrimUpdate(currentGainDist);
+  onTrimAngleUpdate(currentGainAngle);
   onSpeedUpdate(speed);
   onDistanceUpdate(distance);
 }

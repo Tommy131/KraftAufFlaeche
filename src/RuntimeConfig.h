@@ -21,9 +21,13 @@
 #define PSK "fosbosprojekt"
 #define HOSTNAME "esp32"
 
-#define KEY_KP_PID "KP_PID"
-#define KEY_KI_PID "KI_PID"
-#define KEY_KD_PID "KD_PID"
+#define KEY_KP_PID_DIST "KP_PID_DIST"
+#define KEY_KI_PID_DIST "KI_PID_DIST"
+#define KEY_KD_PID_DIST "KD_PID_DIST"
+
+#define KEY_KP_PID_ANGLE "KP_PID_ANGLE"
+#define KEY_KI_PID_ANGLE "KI_PID_ANGLE"
+#define KEY_KD_PID_ANGLE "KD_PID_ANGLE"
 
 #define KEY_DISTANCE "DISTANCE"
 #define KEY_SPEED "SPEED"
@@ -50,13 +54,15 @@ public:
 
     void setupRuntimeConfig();
     void loopRuntimeConfig();
-    void setOnTrimeUpdateCallback(std::function<void(pid::pid_trim_t& updated)> onTrimUpdate);
+    void setOnGainDistUpdateCallback(std::function<void(pid::pid_trim_t& updated)> onTrimUpdate);
+    void setOnGainAngleUpdateCallback(std::function<void(pid::pid_trim_t& updated)> onTrimAngleUpdate);
     void setOnDistanceUpdateCallback(std::function<void(uint16_t distance)> _onDistanceUpdate);
     void setOnSpeedUpdate(std::function<void(int8_t speed)> _onSpeedUpdate);
 private:
     SerialType& debug_serial;
 
     std::function<void(pid::pid_trim_t& updated)> onTrimUpdate = [](pid::pid_trim_t& u){};
+    std::function<void(pid::pid_trim_t& updated)> onTrimAngleUpdate = [](pid::pid_trim_t& u){};
     std::function<void(uint16_t distance)> onDistanceUpdate = [](uint16_t distance){};
     std::function<void(int8_t speed)> onSpeedUpdate = [](int8_t  speed){};
 
@@ -86,9 +92,13 @@ private:
     };
 
     std::vector<persist_pair<float>> settingsFloat {
-        (persist_pair<float>)  { KEY_KP_PID, currentTrim.kp },
-        (persist_pair<float>) { KEY_KI_PID, currentTrim.ki },
-        (persist_pair<float>) { KEY_KD_PID, currentTrim.kd },
+        (persist_pair<float>) { KEY_KP_PID_DIST, currentGainDist.kp },
+        (persist_pair<float>) { KEY_KI_PID_DIST, currentGainDist.ki },
+        (persist_pair<float>) { KEY_KD_PID_DIST, currentGainDist.kd },
+
+        (persist_pair<float>) { KEY_KP_PID_ANGLE, currentGainAngle.kp },
+        (persist_pair<float>) { KEY_KI_PID_ANGLE, currentGainAngle.ki },
+        (persist_pair<float>) { KEY_KD_PID_ANGLE, currentGainAngle.kd },
     };
 
 
@@ -118,7 +128,8 @@ private:
     void init_persisted_prefs(Preferences& prefs);
 
 
-    pid::pid_trim_t currentTrim;
+    pid::pid_trim_t currentGainDist;
+    pid::pid_trim_t currentGainAngle;
     int8_t speed = MAX_SPEED;
     uint16_t distance = DEFAULT_DISTANCE;
 

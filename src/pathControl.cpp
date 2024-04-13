@@ -175,5 +175,5 @@ uint16_t pathControl::estimateRealDistance(float angle, uint16_t dist_raw){
 
 uint16_t pathControl::calculateDist(uint16_t dist1_raw, uint16_t dist2_raw){
     float angle = estimateAngle(dist1_raw, dist2_raw);
-    return estimateRealDistance(angle, dist1_raw);
+    return estimateRealDistance(angle, DISTANCE_TOF_MID + dist1_raw);
 }

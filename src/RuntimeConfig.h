@@ -49,6 +49,7 @@ public:
     RuntimeConfig(SerialType& _debug_serial, DNSServer& dns);
 
     void setupRuntimeConfig();
+    void loopRuntimeConfig();
     void setOnTrimeUpdateCallback(std::function<void(pid::pid_trim_t& updated)> onTrimUpdate);
     void setOnDistanceUpdateCallback(std::function<void(uint16_t distance)> _onDistanceUpdate);
     void setOnSpeedUpdate(std::function<void(int8_t speed)> _onSpeedUpdate);

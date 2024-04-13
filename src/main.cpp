@@ -99,7 +99,7 @@ void loop() {
 #if defined(ARDUINO_ARCH_ESP32)
   serial_out.printf("Dist:%dmm, PID: %f\n", dist, steer);  //debug output for testing
   serial_out.printf("1: %d, 2: %d, deg: %f, dist: %d\n", dist, dist1, resul*RAD_TO_DEG, res);
-  dns.processNextRequest();
+  runtimeConfig.loopRuntimeConfig();
 #else
   serial_out.print("Dist: ");
   serial_out.print(dist, DEC);

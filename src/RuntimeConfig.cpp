@@ -211,6 +211,10 @@ void RuntimeConfig::setupRuntimeConfig() {
   onDistanceUpdate(distance);
 }
 
+void RuntimeConfig::loopRuntimeConfig(){
+  dnsServer.processNextRequest();
+}
+
 } // runtimeconfig
 
 #endif

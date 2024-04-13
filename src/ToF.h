@@ -17,7 +17,7 @@ public:
     /**
      * @brief constructor
     */
-    ToF(float _correction);
+    ToF(float _offset);
 
     /**
      * @brief init sensor and starts the continues measurement mode 
@@ -57,5 +57,5 @@ private:
     uint16_t avg_range = 0;     //range after the filter
     bool valid_reading = false; //true if a valid reading is available
 
-    float correction;
+    float offset;
 };

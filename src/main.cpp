@@ -27,8 +27,8 @@
 pid::PID pidWall(default_pid_trim, 0, false, serial_out);
 
 //Init ToF
-ToF backWall(0.9);
-ToF frontWall(1.0);
+ToF backWall(BACK_TOF_VALUE_OFFSET);
+ToF frontWall(0);
 
 //drive
 MotorControl motorControl(serial_out);
@@ -86,7 +86,7 @@ void loop() {
 
   bool val_ok = backWall.read_ToF_mm(dist1);
   val_ok = frontWall.read_ToF_mm(dist);
-
+  
   float resul = path.estimateAngle(dist, dist1);
   uint16_t res = path.calculateDist(dist, dist1);
 
@@ -97,7 +97,7 @@ void loop() {
   motorControl.normalDrive(50, steer);
   //path.loop();
 #if defined(ARDUINO_ARCH_ESP32)
-  serial_out.printf("Dist:%dmm, PID: %f\n", dist, steer);  //debug output for testing
+  //serial_out.printf("Dist:%dmm, PID: %f\n", dist, steer);  //debug output for testing
   serial_out.printf("1: %d, 2: %d, deg: %f, dist: %d\n", dist, dist1, resul*RAD_TO_DEG, res);
   runtimeConfig.loopRuntimeConfig();
 #else

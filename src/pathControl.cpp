@@ -14,8 +14,8 @@
 
 pathControl::pathControl(uint16_t _dist, SerialType& _serial_out, MotorControl *_motors, ToF  *_frontToF, ToF *_backToF, pid::PID *_pid)
     : speed(MAX_SPEED)
-    , frontToF_default(1.0)
-    , backToF_default(1.0)
+    , frontToF_default(0)
+    , backToF_default(BACK_TOF_VALUE_OFFSET)
     , serial_out(_serial_out)
 {
     dist = constrain(_dist, 0, 2000);

@@ -6,7 +6,7 @@
 
 
 ToF::ToF(float _correction) {
-    correction = _correction;
+    offset = _correction;
 }
 
 
@@ -61,7 +61,7 @@ bool ToF::read_ToF_mm(uint16_t& range_in){
         if(!sensorInit)                 valid_reading = false; //do nothing if not init
         else {
             uint16_t temp_range = 0;
-            temp_range = sensor_ToF.readRangeContinuousMillimeters() * correction;
+            temp_range = sensor_ToF.readRangeContinuousMillimeters() + offset;
             if(temp_range >= 3000) valid_reading = false; //indicates generally a bad reading(max range 2000mm)
             else {
                 //Serial.print("tempRange: "); Serial.print(temp_range); Serial.print(" avrRange_bev:"); Serial.print(avg_range);

@@ -14,6 +14,7 @@
 
 #define DISTANCE_TOF 78.0 //mm //distance between the two sensors
 #define DISTANCE_TOF_MID 40 //mm //distance between rotation point(mid plane of Robot) and sensor
+#define BACK_TOF_VALUE_OFFSET -9 //mm //measurement offset of this sensor  
 
 #ifndef DEG_TO_RAD
     #define DEG_TO_RAD     = (PI/180);

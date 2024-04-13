@@ -8,13 +8,14 @@
 
 
 //pathControl
-#define CORNER_THR 5000 //mm //If value is bigger or equal a corner is detected
+#define CORNER_THR 500 //mm //If value is bigger or equal a corner is detected
 #define MAX_SPEED 100   //PERCENT that the controller should aim to meet
 #define DEFAULT_DISTANCE 100
 
 #define DISTANCE_TOF 78.0 //mm //distance between the two sensors
 #define DISTANCE_TOF_MID 40 //mm //distance between rotation point(mid plane of Robot) and sensor
 #define BACK_TOF_VALUE_OFFSET -9 //mm //measurement offset of this sensor  
+#define ANGLE_TO_WALL_PARALLEL (90 * DEG_TO_RAD) //RAD //angle the robot has if it is parallel to the wall
 
 #ifndef DEG_TO_RAD
     #define DEG_TO_RAD     = (PI/180);
@@ -32,11 +33,12 @@
 //output codes
 enum outputCode{
     OUT_CODE_ERR           = 0,
-    OUT_CODE_OK            = 1,   //
+    OUT_CODE_OK            = 1,   
     OUT_CODE_CORNER        = 2,   //If a corner is detected
     OUT_CODE_NO_TOF_MESS   = 3,   //If no ToF measurement could be done 
     OUT_CODE_ERR_MOTOR     = 4,   //When problems motors are 
     OUT_CODE_INVAL_NUM     = 5,   //If the number Provided is invalid 
+    OUT_CODE_PASS          = 6,   //If no ERR or OK state could be determent 
 };
     
 
@@ -56,8 +58,12 @@ enum outputCode{
                             // HIGH -> send to DXL
                             // LOW  -> receive from DXL
 
-    #define PIN_I2C_SDA 19   //Pin for SDA communication to the sensor(s)
-    #define PIN_I2C_SCL 23   //Pin for SCL communication to the sensor(s)
+    #define PIN_I2C_SDA 19  // Pin for SDA communication to the sensor(s)
+    #define PIN_I2C_SCL 23  // Pin for SCL communication to the sensor(s)
+
+    #define PIN_TOUCH   27  // Pin for Capacitive Sensor
+    #define TOUCH_THR   60  //Threshold for the Capacitive Pin of ESP32
+
 #endif
 
 #if defined(PIO_UNIT_TESTING)

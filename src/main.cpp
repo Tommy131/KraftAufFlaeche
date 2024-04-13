@@ -25,15 +25,13 @@
 
 //Init for PID
 pid::PID pidWall(default_pid_trim, 0, false, serial_out);
+pid::PID pidAngle(default_pid_angle_trim, 0, false, serial_out);
 
 //Init ToF
 ToF backWall(BACK_TOF_VALUE_OFFSET);
 ToF frontWall(0);
 
-//drive
-MotorControl motorControl(serial_out);
-
-pathControl path(DEFAULT_DISTANCE, serial_out, &motorControl, &frontWall, &backWall, &pidWall);
+pathControl path(DEFAULT_DISTANCE, serial_out, nullptr, &frontWall, &backWall, &pidWall, &pidAngle);
 
 #if defined(RUNTIME_CONFIG_ENABLE) && defined(ARDUINO_ARCH_ESP32)
 DNSServer dns;
@@ -48,18 +46,18 @@ void setup() {
   
   pinMode(PIN_XSHUT_TOF_1, OUTPUT);
   digitalWrite(PIN_XSHUT_TOF_1, HIGH);
-  
-  //drive init
-  //motorControl.init();
-
-  //PID init
-  //pidWall.setpoint = 100.0;
 
   #if defined(RUNTIME_CONFIG_ENABLE) && defined(ARDUINO_ARCH_ESP32)
-  runtimeConfig.setOnTrimeUpdateCallback([](pid::pid_trim_t& upd) {
+  runtimeConfig.setOnGainDistUpdateCallback([](pid::pid_trim_t& upd) {
     pidWall.setGain(upd);
     pidWall.printGain(upd);
   });
+
+  runtimeConfig.setOnGainAngleUpdateCallback([](pid::pid_trim_t& upd) {
+    pidAngle.setGain(upd);
+    pidAngle.printGain(upd);
+  });
+
 
   runtimeConfig.setOnSpeedUpdate([](int8_t speed) {
   path.setSpeed(speed);
@@ -73,39 +71,48 @@ void setup() {
   #endif
 
 #if defined(ARDUINO_ARCH_ESP32) 
+
   serial_out.printf("PathInitCode(1): %d\n", path.init());
+  while (touchRead(PIN_TOUCH) >= TOUCH_THR); //Wait for start Signal
+
+#elif
+  serial_out.print("PathInitCode(1): ");
+  serial_out.println(path.init());
 #endif
+
+  serial_out.println("Now entering main loop()");
 
 } // setup
 
-uint16_t dist = 0;
-uint16_t dist1 = 0;
 
 void loop() {
-  //serial_out.println("loop()");
 
-  bool val_ok = backWall.read_ToF_mm(dist1);
-  val_ok = frontWall.read_ToF_mm(dist);
-  
-  float resul = path.estimateAngle(dist, dist1);
-  uint16_t res = path.calculateDist(dist, dist1);
-
-  // if (!val_ok) {
-  //   serial_out.println("ERROR: read_ToF_mm()");
-  // }
-  float steer = pidWall.calculations(dist);
-  motorControl.normalDrive(50, steer);
-  //path.loop();
-#if defined(ARDUINO_ARCH_ESP32)
-  //serial_out.printf("Dist:%dmm, PID: %f\n", dist, steer);  //debug output for testing
-  serial_out.printf("1: %d, 2: %d, deg: %f, dist: %d\n", dist, dist1, resul*RAD_TO_DEG, res);
+  path.loop();
   runtimeConfig.loopRuntimeConfig();
-#else
-  serial_out.print("Dist: ");
-  serial_out.print(dist, DEC);
-  serial_out.print(", PID: ");
-  serial_out.println(steer, 4);
-#endif
-  delay(100);
+
 } // loop
 #endif // PIO_UNIT_TESTING
+
+
+/**
+ * Possible Start/Stop config with touch sensor
+ * Global:
+ * 
+// bool stopLoop = false;
+// uint16_t touchCNT = 0;
+ * 
+ * In loop():
+// if(touchRead(PIN_TOUCH) <= TOUCH_THR) touchCNT ++;
+// else                                  touchCNT = 0;
+// if(touchCNT >= 5000) {
+//   stopLoop = !stopLoop;
+//   touchCNT = 0;
+//   while(touchRead(PIN_TOUCH) <= TOUCH_THR);
+// }
+// if(!stopLoop){
+  path.loop();
+// } else {
+//   //path.stopMotors();
+// }
+// runtimeConfig.loopRuntimeConfig();
+*/

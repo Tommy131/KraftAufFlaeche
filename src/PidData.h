@@ -13,4 +13,5 @@ typedef struct {
 }
 
 extern pid::pid_trim_t default_pid_trim;
+extern pid::pid_trim_t default_pid_angle_trim;
 

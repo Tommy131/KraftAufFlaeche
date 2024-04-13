@@ -57,5 +57,7 @@ private:
     uint16_t avg_range = 0;     //range after the filter
     bool valid_reading = false; //true if a valid reading is available
 
+    const uint32_t MAX_READING = 200000; //mm //maximum the ToF can measure
+
     float offset;
 };

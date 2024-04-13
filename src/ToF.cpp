@@ -39,7 +39,7 @@ outputCode ToF::init_ToF(int8_t pin_off /* = -1*/, uint8_t changeAddress /* = 0x
         sensor_ToF.setAddress(changeAddress);
         digitalWrite(pin_off, HIGH);
     }
-    sensor_ToF.setMeasurementTimingBudget(200000);
+    sensor_ToF.setMeasurementTimingBudget(50000);
     sensor_ToF.startContinuous();
     return OUT_CODE_OK;
 }
@@ -62,7 +62,7 @@ bool ToF::read_ToF_mm(uint16_t& range_in){
         else {
             uint16_t temp_range = 0;
             temp_range = sensor_ToF.readRangeContinuousMillimeters() + offset;
-            if(temp_range >= 3000) valid_reading = false; //indicates generally a bad reading(max range 2000mm)
+            if(temp_range >= MAX_READING) valid_reading = false; //indicates generally a bad reading(max range 2000mm)
             else {
                 //Serial.print("tempRange: "); Serial.print(temp_range); Serial.print(" avrRange_bev:"); Serial.print(avg_range);
                 //avg_range = (temp_range + avg_range)/2;

@@ -22,7 +22,7 @@ private:
         drive_normal                = 0,
         drive_corner                = 1,
         drive_one_no_new_ToF_data   = 2,
-        drive_both_no_new_ToF_data  = 2,
+        drive_both_no_new_ToF_data  = 3,
     };
 
     enum ID_ToFSensor{
@@ -39,19 +39,27 @@ private:
     ToF frontToF_default;
     ToF backToF_default;
 
+    uint32_t lastMS;
+    const uint32_t loopIntervalTime = 50; //ms //interval of loop()
 
     pid::PID pidDefault = pid::PID(default_pid_trim, 0, false, serial_out);
-    pid::PID *pid;
+    pid::PID *pidDist;
+
+    pid::PID pidDefaultAngle = pid::PID(default_pid_angle_trim, 0, false, serial_out);
+    pid::PID *pidAngle;
     
     MotorControl motorDefault = MotorControl(serial_out);
     MotorControl *motors;
 
     SerialType& serial_out;
 
-    uint8_t driveState  = drive_normal;
+    uint16_t real_ToF_dist;
+    float rotation;
+
+    driveModes driveState  = drive_normal;
     float calc_steer = 0;
 public:
-    pathControl(uint16_t _dist, SerialType& _serial_out, MotorControl *_motors = nullptr, ToF *_front_ToF = nullptr, ToF *_backToF = nullptr, pid::PID *_pid = nullptr);
+    pathControl(uint16_t _dist, SerialType& _serial_out, MotorControl *_motors = nullptr, ToF *_front_ToF = nullptr, ToF *_backToF = nullptr, pid::PID *_pidDist = nullptr, pid::PID *_pidAngle = nullptr);
     ~pathControl();
 
     uint16_t getDist() const        { return dist; }
@@ -64,7 +72,7 @@ public:
     bool init();
 
     /**
-     * @brief complete what should be done in one loop 
+     * @brief complete what should be done in one loop with interval defined loopIntervalTime
      * @return outputs output codes defined in enum outputCode (constants.h)
     */
     outputCode loop();
@@ -74,7 +82,7 @@ public:
      * @param frontORback takes the enum ID_ToFSensor to select the to be evaluated sensor
      * @return outputs output codes defined in enum outputCode (constants.h) [OUT_CODE_OK, OUT_CODE_CORNER, OUT_CODE_NO_TOF_MESS]
     */
-    outputCode checkForCorner(bool frontORback);
+    outputCode checkForCorner(ID_ToFSensor frontORback);
 
     /**
      * @brief executes a shortcut maneuver to shortcut corners 
@@ -105,5 +113,10 @@ public:
      * @return returns distance from wall 
     */
     uint16_t calculateDist(uint16_t dist1_raw, uint16_t dist2_raw);
+
+    /**
+     * @brief stops all motors
+    */
+   void stopMotors();
 };
 

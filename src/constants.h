@@ -8,7 +8,7 @@
 
 
 //pathControl
-#define CORNER_THR 500 //mm //If value is bigger or equal a corner is detected
+#define CORNER_THR 400 //mm //If value is bigger or equal a corner is detected
 #define MAX_SPEED 100   //PERCENT that the controller should aim to meet
 #define DEFAULT_DISTANCE 100
 

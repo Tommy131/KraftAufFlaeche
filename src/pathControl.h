@@ -45,6 +45,7 @@ private:
 
     uint32_t lastMS;
     const uint32_t loopIntervalTime = 50; //ms //interval of loop()
+    const uint32_t maxTimeCorner = 1000; //ms //max time the robot has to determine if its a corner
 
     pid::PID pidDefault = pid::PID(default_pid_trim, 0, false, serial_out);
     pid::PID *pidDist;
@@ -63,6 +64,7 @@ private:
 
     /**
      * @brief checks angle for validity
+     * @param angle angle in RAD to be checked
      * @return true if valid, false otherwise
      * */    
     inline bool checkAngle(float angle);
@@ -88,9 +90,10 @@ public:
     /**
      * @brief checks ToF sensor for occurrence of a corner in the control surface
      * @param frontORback takes the enum ID_ToFSensor to select the to be evaluated sensor
+     * @param checkRotation set to true if the angle should be checked as well
      * @return outputs output codes defined in enum outputCode (constants.h) [OUT_CODE_OK, OUT_CODE_CORNER, OUT_CODE_NO_TOF_MESS]
     */
-    outputCode checkForCorner(ID_ToFSensor frontORback);
+    outputCode checkForCorner(ID_ToFSensor frontORback, bool checkRotation = true);
 
     /**
      * @brief executes a shortcut maneuver to shortcut corners 

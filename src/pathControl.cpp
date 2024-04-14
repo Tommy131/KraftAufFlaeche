@@ -47,6 +47,7 @@ bool pathControl::init(){
     if(!frontToF->getInit())    ret += !frontToF->init_ToF();
 
     ret += !motors->init();
+    motors->normalDrive(0,0);
 
     pidDist->setSetPoint(dist);
     pidAngle->setSetPoint(ANGLE_TO_WALL_PARALLEL);
@@ -119,7 +120,7 @@ outputCode pathControl::loop(){
     return OUT_CODE_PASS;
 }
 
-outputCode pathControl::checkForCorner(ID_ToFSensor ToFtoRead){
+outputCode pathControl::checkForCorner(ID_ToFSensor ToFtoRead, bool checkRotation /*= true*/){
     //TODO: More Sophisticated?
     ToF *readToF = backToF;
     ToF *secToF = frontToF; 
@@ -127,9 +128,22 @@ outputCode pathControl::checkForCorner(ID_ToFSensor ToFtoRead){
         readToF = frontToF;
         secToF = backToF;
     }
-    
+
     readToF->read_ToF_mm();
     secToF->read_ToF_mm();
+
+    if(!checkAngle(rotation) && checkRotation && secToF->getAvgRange() <= CORNER_THR) {
+        uint32_t startTimeMs = millis();
+
+        motors->normalDrive(speed, 0);
+
+        while(millis() - startTimeMs <= maxTimeCorner) {
+            outputCode ret = checkForCorner(ToFtoRead, false);
+            serial_out.printf("T-ms %d, ToF1: %d, ToF2: %d\n",millis() - startTimeMs, frontToF->getAvgRange(), backToF->getAvgRange()); 
+            if(ret != OUT_CODE_OK) return ret;
+        }
+    }
+
     if(readToF->getValidRead() && secToF->getValidRead()){
         if(readToF->getAvgRange() >= CORNER_THR && secToF->getAvgRange() <= CORNER_THR)   {
             return OUT_CODE_CORNER;
@@ -140,24 +154,26 @@ outputCode pathControl::checkForCorner(ID_ToFSensor ToFtoRead){
 }
 
 outputCode pathControl::shortcutCorner(){
-    //motors->normalDrive(speed, -10);    //TODO TUNING!!!!!
-    motors->normalDrive(0, 0);
-    int16_t ret = 0;
+    motors->normalDrive(speed/2, -100);    //TODO TUNING!!!!!
+    outputCode ret = OUT_CODE_CORNER;
+    delay(100);
     while(ret == OUT_CODE_CORNER) {
-        ret = checkForCorner(ID_frontTof);
+        ret = checkForCorner(ID_frontTof, false);
         if(ret == OUT_CODE_NO_TOF_MESS) return OUT_CODE_NO_TOF_MESS;
     }
 
-    ret = 0;
+    ret = OUT_CODE_CORNER;
     pidDist->reset();
     while(ret == OUT_CODE_CORNER) {
-        ret = checkForCorner(ID_backToF);
+        ret = checkForCorner(ID_backToF, false);
         if(ret == OUT_CODE_NO_TOF_MESS) return OUT_CODE_NO_TOF_MESS;
 
-    
-        calc_steer = pidDist->calculations(frontToF->getAvgRange());
-        motors->normalDrive(speed, calc_steer);
+        bool angleValid = checkAngle(estimateAngle(frontToF->read_ToF_mm(), backToF->read_ToF_mm()));
 
+        calc_steer = pidDist->calculations(frontToF->read_ToF_mm());
+        motors->normalDrive(speed/2, calc_steer);
+
+        if(angleValid) break;
     }
 
     driveState = drive_normal;

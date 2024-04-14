@@ -71,7 +71,7 @@ outputCode pathControl::loop(){
         uint16_t ToF_data = 0;
         bool ToF_valid_front = frontToF->read_ToF_mm(ToF_data);
         bool ToF_valid_back  = backToF->read_ToF_mm(ToF_data);                    
-        bool ToF_valid_all = (ToF_valid_front && ToF_valid_back);   //indicates if all ToF's are operational
+        bool ToF_valid_all = (ToF_valid_front && ToF_valid_back) && (frontToF->getAvgRange() <= CORNER_THR || backToF->getAvgRange() <= CORNER_THR);   //indicates if all ToF's are operational and tracking the wall
 
         if(ToF_valid_all){
             real_ToF_dist = calculateDist(frontToF->getAvgRange(), backToF->getAvgRange());
@@ -87,7 +87,7 @@ outputCode pathControl::loop(){
         default:    //Normal Operation
 
             //Step 3.
-            if(ToF_valid_all){
+            if(ToF_valid_all && checkAngle(rotation)){
                 calc_steer = pidAngle->calculations(rotation) + pidDist->calculations(real_ToF_dist)*0.5;
             } else if(ToF_valid_back) {
                 calc_steer = pidDist->calculations(backToF->getAvgRange());
@@ -107,7 +107,7 @@ outputCode pathControl::loop(){
             //Step 5.
 
             #if defined(ARDUINO_ARCH_ESP32)
-                serial_out.printf("speed:%d, dist: %dmm, rot:%.2f PID: %f, driveState:%d\n", speed, real_ToF_dist, rotation*RAD_TO_DEG, calc_steer, driveState);  //debug output for testing
+                serial_out.printf("ToF1: %d, ToF2: %d, speed:%d, dist: %dmm, rot:%.2f PID: %f, driveState:%d\n",frontToF->getAvgRange(), backToF->getAvgRange(), speed, real_ToF_dist, rotation*RAD_TO_DEG, calc_steer, driveState);  //debug output for testing
             #endif
             motors->normalDrive(speed, calc_steer);
 
@@ -140,7 +140,8 @@ outputCode pathControl::checkForCorner(ID_ToFSensor ToFtoRead){
 }
 
 outputCode pathControl::shortcutCorner(){
-    motors->normalDrive(speed, -10);    //TODO TUNING!!!!!
+    //motors->normalDrive(speed, -10);    //TODO TUNING!!!!!
+    motors->normalDrive(0, 0);
     int16_t ret = 0;
     while(ret == OUT_CODE_CORNER) {
         ret = checkForCorner(ID_frontTof);
@@ -202,9 +203,13 @@ uint16_t pathControl::estimateRealDistance(float angle, uint16_t dist_raw){
     return dist;
 }
 
+inline bool pathControl::checkAngle(float angle){
+    return angle <= MAX_ANGLE && angle >= MIN_ANGLE;
+}
+
 uint16_t pathControl::calculateDist(uint16_t dist1_raw, uint16_t dist2_raw){
     float angle = estimateAngle(dist1_raw, dist2_raw);
-    if(angle >= 60 * DEG_TO_RAD) 
+    if(checkAngle(angle)) 
         return estimateRealDistance(angle, DISTANCE_TOF_MID + dist1_raw);
     return DISTANCE_TOF_MID + dist2_raw;
 }

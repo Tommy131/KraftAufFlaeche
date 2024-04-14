@@ -16,6 +16,9 @@
 #define DISTANCE_TOF_MID 40 //mm //distance between rotation point(mid plane of Robot) and sensor
 #define BACK_TOF_VALUE_OFFSET -9 //mm //measurement offset of this sensor  
 #define ANGLE_TO_WALL_PARALLEL (90 * DEG_TO_RAD) //RAD //angle the robot has if it is parallel to the wall
+#define DIFF_ANGLE (30 * DEG_TO_RAD) // RAD //difference angle after witch the angle should be considered not valid (± to ANGLE_TO_WALL_PARALLEL)
+#define MAX_ANGLE (ANGLE_TO_WALL_PARALLEL + DIFF_ANGLE) //RAD //if the angle is bigger than the measurement is not valid  
+#define MIN_ANGLE (ANGLE_TO_WALL_PARALLEL - DIFF_ANGLE) //RAD //if the angle is smaller than the measurement is not valid  
 
 #ifndef DEG_TO_RAD
     #define DEG_TO_RAD     = (PI/180);

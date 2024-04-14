@@ -55,13 +55,17 @@ private:
     MotorControl motorDefault = MotorControl(serial_out);
     MotorControl *motors;
 
-    
-
     uint16_t real_ToF_dist;
     float rotation;
 
     driveModes driveState  = drive_normal;
     float calc_steer = 0;
+
+    /**
+     * @brief checks angle for validity
+     * @return true if valid, false otherwise
+     * */    
+    inline bool checkAngle(float angle);
 public:
     pathControl(uint16_t _dist, SerialType& _serial_out, MotorControl *_motors = nullptr, ToF *_front_ToF = nullptr, ToF *_backToF = nullptr, pid::PID *_pidDist = nullptr, pid::PID *_pidAngle = nullptr);
     ~pathControl();

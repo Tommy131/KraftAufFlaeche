@@ -12,6 +12,7 @@
 #include "MotorControl.h"
 #include "RuntimeConfig.h"
 #include "PidData.h"
+#include "IMU.h"
 
 
 class pathControl {
@@ -41,7 +42,7 @@ private:
     ToF *frontToF;
     ToF *backToF;
     
-
+    IMU imu;
 
     uint32_t lastMS;
     const uint32_t loopIntervalTime = 50; //ms //interval of loop()
@@ -61,6 +62,7 @@ private:
 
     driveModes driveState  = drive_normal;
     float calc_steer = 0;
+
 
     /**
      * @brief checks angle for validity

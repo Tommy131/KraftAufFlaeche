@@ -45,6 +45,8 @@ bool pathControl::init(){
     uint8_t ret = 0;
     if(!backToF->getInit())     ret += !backToF->init_ToF(PIN_XSHUT_TOF_1, ADDRESS_TOF_2);
     if(!frontToF->getInit())    ret += !frontToF->init_ToF();
+    
+    ret += !imu.init();
 
     ret += !motors->init();
     motors->normalDrive(0,0);
@@ -78,6 +80,8 @@ outputCode pathControl::loop(){
             real_ToF_dist = calculateDist(frontToF->getAvgRange(), backToF->getAvgRange());
             rotation = estimateAngle(frontToF->getAvgRange(), backToF->getAvgRange());
         }
+
+        imu.getIMUdata();
         //Step 2.
 
         switch (driveState) {
@@ -108,7 +112,7 @@ outputCode pathControl::loop(){
             //Step 5.
 
             #if defined(ARDUINO_ARCH_ESP32)
-                serial_out.printf("ToF1: %d, ToF2: %d, speed:%d, dist: %dmm, rot:%.2f PID: %f, driveState:%d\n",frontToF->getAvgRange(), backToF->getAvgRange(), speed, real_ToF_dist, rotation*RAD_TO_DEG, calc_steer, driveState);  //debug output for testing
+                serial_out.printf("ToF1: %d, ToF2: %d, speed:%d, dist: %dmm, rot:%.2f PID: %f, driveState:%d, angleX: %.2f, angleY: %.2f, angleZ: %.2f\n",frontToF->getAvgRange(), backToF->getAvgRange(), speed, real_ToF_dist, rotation*RAD_TO_DEG, calc_steer, driveState, imu.getGyro().x, imu.getGyro().y, imu.getGyro().z);  //debug output for testing
             #endif
             motors->normalDrive(speed, calc_steer);
 

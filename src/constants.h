@@ -42,6 +42,7 @@ enum outputCode{
     OUT_CODE_ERR_MOTOR     = 4,   //When problems motors are 
     OUT_CODE_INVAL_NUM     = 5,   //If the number Provided is invalid 
     OUT_CODE_PASS          = 6,   //If no ERR or OK state could be determent 
+    OUT_CODE_MPU_ERR       = 7,   //If an error with the mpu is present  
 };
     
 

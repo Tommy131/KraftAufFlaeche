@@ -139,7 +139,9 @@ outputCode pathControl::checkForCorner(ID_ToFSensor ToFtoRead, bool checkRotatio
 
         while(millis() - startTimeMs <= maxTimeCorner) {
             outputCode ret = checkForCorner(ToFtoRead, false);
-            serial_out.printf("T-ms %d, ToF1: %d, ToF2: %d\n",millis() - startTimeMs, frontToF->getAvgRange(), backToF->getAvgRange()); 
+            #if defined(ARDUINO_ARCH_ESP32)
+                serial_out.printf("T-ms %d, ToF1: %d, ToF2: %d\n",millis() - startTimeMs, frontToF->getAvgRange(), backToF->getAvgRange());
+            #endif 
             if(ret != OUT_CODE_OK) return ret;
         }
     }

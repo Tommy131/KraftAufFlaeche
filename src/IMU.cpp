@@ -19,7 +19,8 @@ outputCode IMU::init() {
     #elif defined(ARDUINO_ARCH_ESP32)
         Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
     #endif
-    //Wire.setClock(1000000); //Note this is 2.5 times the spec sheet 400 kHz max...
+    
+    Wire.setClock(1000000); //Note this is 2.5 times the spec sheet 400 kHz max...
     
     mpu6050.initialize();
 
@@ -101,7 +102,6 @@ void IMU::calculate_IMU_error() {
   int c = 0;
   while (c < 12000) {
     mpu6050.getMotion6(&AcX, &AcY, &AcZ, &GyX, &GyY, &GyZ);
-    
     Acc.x  = AcX / ACCEL_SCALE_FACTOR;
     Acc.y  = AcY / ACCEL_SCALE_FACTOR;
     Acc.z  = AcZ / ACCEL_SCALE_FACTOR;
@@ -110,21 +110,21 @@ void IMU::calculate_IMU_error() {
     Gyro.z = GyZ / GYRO_SCALE_FACTOR;
     
     //Sum all readings
-    AccError.x  = AccErrorX + Acc.x;
-    AccError.y  = AccErrorY + Acc.y;
-    AccError.z  = AccErrorZ + Acc.z;
-    GyroError.x = GyroErrorX + Gyro.x;
-    GyroError.y = GyroErrorY + Gyro.y;
-    GyroError.z = GyroErrorZ + Gyro.z;
+    AccError.x  = AccError.x + Acc.x;
+    AccError.y  = AccError.y + Acc.y;
+    AccError.z  = AccError.z + Acc.z;
+    GyroError.x = GyroError.x + Gyro.x;
+    GyroError.y = GyroError.y + Gyro.y;
+    GyroError.z = GyroError.z + Gyro.z;
     c++;
   }
   //Divide the sum by 12000 to get the error value
-  AccError.x  = AccErrorX / c;
-  AccError.y  = AccErrorY / c;
-  AccError.z  = AccErrorZ / c - 1.0;
-  GyroError.x = GyroErrorX / c;
-  GyroError.y = GyroErrorY / c;
-  GyroError.z = GyroErrorZ / c;
+  AccError.x  = AccError.x / c;
+  AccError.y  = AccError.y / c;
+  AccError.z  = AccError.z / c - 1.0;
+  GyroError.x = GyroError.x / c;
+  GyroError.y = GyroError.y / c;
+  GyroError.z = GyroError.z / c;
   
   Serial.print("float AccErrorX = ");
   Serial.print(AccError.x);
@@ -235,26 +235,12 @@ void IMU::Madgwick6DOF(float gx, float gy, float gz, float ax, float ay, float a
   attitude.z = -atan2(q1*q2 + q0*q3, 0.5f - q2*q2 - q3*q3)*57.29577951; //degrees
 }
 
-void IMU::imuReadTask( void * pvParameters){
-    TickType_t xLastWakeTime;
-    const TickType_t xFrequency = 100;
-
-    // Initialise the xLastWakeTime variable with the current time.
-    xLastWakeTime = xTaskGetTickCount();
-    
-    uint64_t current_time = micros();
-    uint64_t prev_time = micros();
-    float dt;
-
-    for( ;; ) {
-        // Wait for the next cycle.
-        vTaskDelayUntil( &xLastWakeTime, xFrequency );
-
-        prev_time = current_time;      
-        current_time = micros();      
-        dt = (current_time - prev_time)/1000000.0; 
-        getIMUdata();
-        Madgwick6DOF(Gyro.x, -Gyro.y, -Gyro.z, -Acc.x, Acc.y, Acc.z, dt);
-
-    }
+void IMU::imuReadTask(){
+  if(micros() - current_time >= FREQUENCY_IMU){
+    prev_time = current_time;      
+    current_time = micros();      
+    dt = (current_time - prev_time)/1000000.0; 
+    getIMUdata();
+    Madgwick6DOF(Gyro.x, -Gyro.y, -Gyro.z, -Acc.x, Acc.y, Acc.z, dt);
+  }
 }

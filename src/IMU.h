@@ -20,8 +20,11 @@ public:
     void getIMUdata();
     void calculate_IMU_error();
 
-    data3D getAccel()   const { return Acc; }
-    data3D getGyro()    const { return Gyro; }
+    data3D getAccel()    const { return Acc; }
+    data3D getGyro()     const { return Gyro; }
+    data3D getAttitude() const { return attitude; }
+
+    void imuReadTask();
 
 private:
     MPU6050 mpu6050;
@@ -32,14 +35,14 @@ private:
 
     //IMU:
 
-    const float AccErrorX = 0.00;
-    const float AccErrorY = -0.01;
-    const float AccErrorZ = -0.14;
+    const float AccErrorX = 1.02;
+    const float AccErrorY = -0.02;
+    const float AccErrorZ = -1.15;
 
 
-    const float GyroErrorX = 1.02;
-    const float GyroErrorY = 0.64;
-    const float GyroErrorZ = -0.97;
+    const float GyroErrorX = -1.71;
+    const float GyroErrorY = 0.71;
+    const float GyroErrorZ = 0.33;
 
     float B_madgwick = 0.04;  //Madgwick filter parameter
     const float B_accel = 0.14;     //Accelerometer LP filter paramter, (MPU6050 default: 0.14.)
@@ -61,7 +64,11 @@ private:
     void Madgwick6DOF(float gx, float gy, float gz, float ax, float ay, float az, float invSampleFreq);
     float inline invSqrt(float x);
 
-    TaskHandle_t imuRead;
-    void imuReadTask( void * pvParameters);
+    uint64_t current_time = micros();
+    uint64_t prev_time = micros();
+    float dt;
+    #define FREQUENCY_IMU 500 //us //
+    
+    
 
 };

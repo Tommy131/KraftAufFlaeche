@@ -53,13 +53,19 @@ bool pathControl::init(){
 
     pidDist->setSetPoint(dist);
     pidAngle->setSetPoint(ANGLE_TO_WALL_PARALLEL);
-
+    
+    delay(1000);
+    //imu.calculate_IMU_error();
+    
     if(ret == 0) return true;
     return false;
 }
 
 
 outputCode pathControl::loop(){
+    
+    // imu.imuReadTask();
+    
     if(millis() - lastMS > loopIntervalTime){
         lastMS = millis();
         /**
@@ -81,13 +87,13 @@ outputCode pathControl::loop(){
             rotation = estimateAngle(frontToF->getAvgRange(), backToF->getAvgRange());
         }
 
-        imu.getIMUdata();
         //Step 2.
 
         switch (driveState) {
         case drive_corner:
-            return shortcutCorner();
-            break;
+            //return shortcutCorner();
+            
+            // break;
         
         default:    //Normal Operation
 
@@ -104,16 +110,18 @@ outputCode pathControl::loop(){
             }
 
             //Step 4.
-            outputCode ret = checkForCorner(ID_frontTof);
+            outputCode ret = checkForCorner(ID_frontTof, false);
             if(ret == OUT_CODE_NO_TOF_MESS) return OUT_CODE_NO_TOF_MESS;
-            else if(ret == OUT_CODE_CORNER) driveState = drive_corner;
+            //else if(ret == OUT_CODE_CORNER) driveState = drive_corner;
             else                            driveState = drive_normal;
 
             //Step 5.
 
             #if defined(ARDUINO_ARCH_ESP32)
-                serial_out.printf("ToF1: %d, ToF2: %d, speed:%d, dist: %dmm, rot:%.2f PID: %f, driveState:%d, angleX: %.2f, angleY: %.2f, angleZ: %.2f\n",frontToF->getAvgRange(), backToF->getAvgRange(), speed, real_ToF_dist, rotation*RAD_TO_DEG, calc_steer, driveState, imu.getGyro().x, imu.getGyro().y, imu.getGyro().z);  //debug output for testing
+                serial_out.printf("ToF1: %d, ToF2: %d, speed:%d, dist: %dmm, rot:%.2f PID: %f, driveState:%d, angleX: %.2f, angleY: %.2f, angleZ: %.2f\n", frontToF->getAvgRange(), backToF->getAvgRange(), speed, real_ToF_dist, rotation*RAD_TO_DEG, calc_steer, driveState, imu.getGyro().x, imu.getAttitude().y, imu.getAttitude().z);  //debug output for testing
+                //serial_out.println(imu.getAttitude().y);
             #endif
+
             motors->normalDrive(speed, calc_steer);
 
             break;

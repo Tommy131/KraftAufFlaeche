@@ -19,6 +19,8 @@ outputCode ToF::init_ToF(int8_t pin_off /* = -1*/, uint8_t changeAddress /* = 0x
     Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
     #endif
 
+    Wire.setClock(1000000);    //note that it is way bigger than the max from the datasheet(400kHz) 
+
     if(pin_off != -1) {
         if(changeAddress == ADDRESS_TOF_1) return OUT_CODE_INVAL_NUM;
         digitalWrite(pin_off, LOW);

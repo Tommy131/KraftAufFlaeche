@@ -43,6 +43,7 @@ public:
     uint16_t getAvgRange()  const   { return avg_range; }
     bool     getValidRead() const   { return valid_reading; }
 
+    static const uint64_t updateToF = 40000; //us 
 
 private:
     bool sensorInit;            //if true the sensor is initialised, else no value is reported

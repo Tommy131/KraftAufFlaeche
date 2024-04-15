@@ -51,7 +51,7 @@ void IMU::getIMUdata() {
     */
     int16_t AcX,AcY,AcZ,GyX,GyY,GyZ;
 
-    mpu6050.getMotion6(&AcX, &AcY, &AcZ, &GyX, &GyY, &GyZ);
+    mpu6050.getMotion6(&AcZ, &AcY, &AcX, &GyZ, &GyY, &GyX);
 
 
     //Accelerometer
@@ -101,7 +101,7 @@ void IMU::calculate_IMU_error() {
   //Read IMU values 12000 times
   int c = 0;
   while (c < 12000) {
-    mpu6050.getMotion6(&AcX, &AcY, &AcZ, &GyX, &GyY, &GyZ);
+    mpu6050.getMotion6(&AcZ, &AcY, &AcX, &GyZ, &GyY, &GyX);
     Acc.x  = AcX / ACCEL_SCALE_FACTOR;
     Acc.y  = AcY / ACCEL_SCALE_FACTOR;
     Acc.z  = AcZ / ACCEL_SCALE_FACTOR;

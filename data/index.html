@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>#KraftAufFlaeche</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <h1>Parameters</h1>
+    <form method="get", action="/updateconfig" id="params">
+        <label for="KP_PID_DIST">KP_PID_DIST</label>
+        <input name="KP_PID_DIST" type="number" step="0.01" id="KP_PID_DIST" />
+        <br />
+        <label for="KI_PID_DIST">KI_PID_DIST</label>
+        <input name="KI_PID_DIST" type="number" step="0.01" id="KI_PID_DIST" />
+        <br />
+        <label for="KD_PID_DIST">KD_PID_DIST</label>
+        <input name="KD_PID_DIST" type="number" step="0.01" id="KD_PID_DIST" />
+        <br />
+        <label for="KP_PID_ANGLE">KP_PID_ANGLE</label>
+        <input name="KP_PID_ANGLE" type="number" step="0.01" id="KP_PID_ANGLE" />
+        <br />
+        <label for="KI_PID_ANGLE">KI_PID_ANGLE</label>
+        <input name="KI_PID_ANGLE" type="number" step="0.01" id="KI_PID_ANGLE" />
+        <br />
+        <label for="KD_PID_ANGLE">KD_PID_ANGLE</label>
+        <input name="KD_PID_ANGLE" type="number" step="0.01" id="KD_PID_ANGLE" />
+        <br />
+        <label for="SPEED">SPEED</label>
+        <input name="SPEED" type="number" step="1" id="SPEED" />
+        <br />
+        <label for="DISTANCE">DISTANCE</label>
+        <input name="DISTANCE" type="number" step="1" id="DISTANCE" />
+        <br />
+        <button type="submit">OK</button>
+    </form>
+</body>
+<style>
+
+* {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+#params * {
+    margin: .2em;
+}
+</style>
+<script>
+'use strict';
+const main = async () => {
+    const resp = await fetch('/getconfig');
+    const body = await resp.json();
+    for (const key of Object.keys(body)) {
+        const value = body[key];
+        const el = document.getElementById(key);
+        if (!el) {
+            continue
+        }
+        if (typeof value === 'number') {
+            if (value % 1) {
+                el.value = value.toFixed(2);
+            } else {
+                el.value = value;
+            }
+        }
+    }
+}
+main();
+
+</script>
+</html>

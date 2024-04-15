@@ -8,9 +8,10 @@
 
 
 //pathControl
-#define CORNER_THR 400 //mm //If value is bigger or equal a corner is detected
-#define MAX_SPEED 100   //PERCENT that the controller should aim to meet
+#define CORNER_THR 300 //mm //If value is bigger or equal a corner is detected
+#define MAX_SPEED 40   //PERCENT that the controller should aim to meet
 #define DEFAULT_DISTANCE 100
+#define TURN_ANGLE 80 //DEG //Angle the robot turns at an corner(measured with an IMU)
 
 #define DISTANCE_TOF 78.0 //mm //distance between the two sensors
 #define DISTANCE_TOF_MID 40 //mm //distance between rotation point(mid plane of Robot) and sensor
@@ -80,4 +81,4 @@ enum outputCode{
     #define DXL_SERIAL Serial1
 #endif
 
-#define RUNTIME_CONFIG_ENABLE 1
+// #define RUNTIME_CONFIG_ENABLE 1

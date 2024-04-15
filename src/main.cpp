@@ -84,6 +84,8 @@ void setup() {
   
 } // setup
 
+// uint32_t loop_time = millis();
+// uint32_t loop_delta = 0;
 
 void loop() {
 
@@ -92,6 +94,11 @@ void loop() {
   #if defined(RUNTIME_CONFIG_ENABLE) && defined(ARDUINO_ARCH_ESP32)
     runtimeConfig.loopRuntimeConfig();
   #endif
+
+  // serial_out.printf("loopDelta: %dms\n", loop_delta);
+  // if(millis()-loop_time > loop_delta) loop_delta = millis()-loop_time;
+  // if((millis()%1000) == 0) loop_delta = 0;
+  // loop_time = millis();
 
 } // loop
 #endif // PIO_UNIT_TESTING

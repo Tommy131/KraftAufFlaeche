@@ -45,7 +45,7 @@ private:
     IMU imu;
 
     uint32_t lastMS;
-    const uint32_t loopIntervalTime = 20; //ms //interval of loop()
+    const uint32_t loopIntervalTime = 40; //ms //interval of loop()
     const uint32_t maxTimeCorner = 1000; //ms //max time the robot has to determine if its a corner
 
     const uint32_t numValidMax = 50; //Loops where the angle has to be valid

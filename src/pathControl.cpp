@@ -78,17 +78,21 @@ void pathControl::readI2CTask(){
 
     ret += !imu.init();
 
-
+    Wire.setClock(400000);
     uint64_t lastToFRead = micros();
-    uint64_t lastIMURead = micros();
 
     for(;;){
         if(micros() - lastToFRead >= ToF::updateToF){
+            lastToFRead = micros();
+
             frontToF->read_ToF_mm();
             backToF->read_ToF_mm();
         }
+        vTaskDelay(10);
         imu.imuReadTask();
+        vTaskDelay(1);
     }
+    vTaskDelete(NULL);
 }
 
 #endif
@@ -128,7 +132,7 @@ outputCode pathControl::loop(){
             rotation = estimateAngle(frontToF->getAvgRange(), backToF->getAvgRange());
         }
         #if defined(ARDUINO_ARCH_ESP32)
-            serial_out.printf("ToF1: %d, ToF2: %d, speed:%d, dist: %dmm, rot:%.2f PID: %f, driveState:%d, IMUangle: %.2f, angleZ: %.2f\n", frontToF->getAvgRange(), backToF->getAvgRange(), speed, real_ToF_dist, rotation*RAD_TO_DEG, calc_steer, driveState, IMUangle, imu.getAttitude().z);  //debug output for testing
+            // serial_out.printf("ToF1: %d, ToF2: %d, speed:%d, dist: %dmm, rot:%.2f PID: %f, driveState:%d, IMUangle: %.2f, angleZ: %.2f\n", frontToF->getAvgRange(), backToF->getAvgRange(), speed, real_ToF_dist, rotation*RAD_TO_DEG, calc_steer, driveState, IMUangle, imu.getAttitude().z);  //debug output for testing
         #endif
 
         //Step 2.
@@ -217,9 +221,9 @@ outputCode pathControl::shortcutCorner(){
     if(state == 0) {
         
         
-        motors->normalDrive(20, -100);
+        motors->normalDrive(30, -100);
         #if defined(ARDUINO_ARCH_ESP32)
-        serial_out.printf("val: %.2f, SetAngle:%.2f, diff: %.2f, delta: %.2f\n", imu.getAttitude().z, IMUangle, angleDifference, (max(curr, IMUangle) - min(curr, IMUangle)));
+        // serial_out.printf("val: %.2f, SetAngle:%.2f, diff: %.2f, delta: %.2f\n", imu.getAttitude().z, IMUangle, angleDifference, (max(curr, IMUangle) - min(curr, IMUangle)));
         #endif
         
         if (angleDifference >= TURN_ANGLE) {

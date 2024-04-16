@@ -28,7 +28,7 @@ pathControl::pathControl(uint16_t _dist, SerialType& _serial_out, MotorControl *
     if(_frontToF == nullptr)    frontToF = &backToF_default;
     else                        frontToF = _frontToF;
 
-    if(_backToF == nullptr)     backToF = &backToF_default; 
+    if(_backToF == nullptr)     backToF = &backToF_default;
     else                        backToF = _backToF;
 
     if(_pidDist == nullptr)     pidDist = &pidDefault;
@@ -109,7 +109,7 @@ outputCode pathControl::loop(){
         /**
          * 1. Check Sensors
          * 2. check for special action(shortcutCorner)
-         * 3. RUN PID   //TODO: Separate PID for front and back?
+         * 3. RUN PID
          * 4. run Checks (Corner)
          * 5. write to Motors
         */
@@ -123,7 +123,7 @@ outputCode pathControl::loop(){
         #elif defined(ARDUINO_ARCH_ESP32)
             #define ToF_valid_front     (frontToF->getValidRead())
             #define ToF_valid_back      (frontToF->getValidRead())
-        #endif     
+        #endif
 
         bool ToF_valid_all = (ToF_valid_front && ToF_valid_back) && (frontToF->getAvgRange() <= CORNER_THR || backToF->getAvgRange() <= CORNER_THR);   //indicates if all ToF's are operational and tracking the wall
 
@@ -177,9 +177,8 @@ outputCode pathControl::loop(){
 }
 
 outputCode pathControl::checkForCorner(ID_ToFSensor ToFtoRead, bool checkRotation /*= true*/){
-    //TODO: More Sophisticated?
     ToF *readToF = backToF;
-    ToF *secToF = frontToF; 
+    ToF *secToF = frontToF;
     if(ToFtoRead == ID_ToFSensor::ID_frontTof) {
         readToF = frontToF;
         secToF = backToF;
@@ -194,12 +193,12 @@ outputCode pathControl::checkForCorner(ID_ToFSensor ToFtoRead, bool checkRotatio
         uint32_t startTimeMs = millis();
         motors->normalDrive(speed, 0);
 
-        while(millis() - startTimeMs <= maxTimeCorner) {         
+        while(millis() - startTimeMs <= maxTimeCorner) {
 
             outputCode ret = checkForCorner(ToFtoRead, false);
             #if defined(ARDUINO_ARCH_ESP32)
                 //serial_out.printf("T-ms %d, ToF1: %d, ToF2: %d\n",millis() - startTimeMs, frontToF->getLastRange(), backToF->getLastRange());
-            #endif 
+            #endif
             if(ret != OUT_CODE_OK) return ret;
         }
     }
@@ -209,7 +208,7 @@ outputCode pathControl::checkForCorner(ID_ToFSensor ToFtoRead, bool checkRotatio
             return OUT_CODE_CORNER;
         }
         return OUT_CODE_OK;
-    } 
+    }
     return OUT_CODE_NO_TOF_MESS;
 }
 
@@ -267,7 +266,7 @@ float pathControl::getDifference(float num1, float num2){
 void pathControl::stopMotors(){
     if(millis() - lastMS > loopIntervalTime){
         lastMS = millis();
-        motors->normalDrive(0, 0); 
+        motors->normalDrive(0, 0);
     }
 }
 
@@ -281,12 +280,12 @@ void pathControl::setSpeed(int8_t _speed) {
 }
 
 
-void pathControl::setDist(uint16_t _dist) { 
+void pathControl::setDist(uint16_t _dist) {
     serial_out.print("Updating distance from: ");
     serial_out.print(dist, DEC);
     serial_out.print("; to ");
     serial_out.println(_dist, DEC);
-    dist = constrain(_dist, 0, 2000); 
+    dist = constrain(_dist, 0, 2000);
     pidDist->setSetPoint(dist);
 }
 
@@ -309,7 +308,7 @@ inline bool pathControl::checkAngle(float angle){
 
 uint16_t pathControl::calculateDist(uint16_t dist1_raw, uint16_t dist2_raw){
     float angle = estimateAngle(dist1_raw, dist2_raw);
-    if(checkAngle(angle)) 
+    if(checkAngle(angle))
         return estimateRealDistance(angle, DISTANCE_TOF_MID + dist1_raw);
     return DISTANCE_TOF_MID + dist2_raw;
 }

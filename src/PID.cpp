@@ -4,7 +4,7 @@ namespace pid {
 
 PID::PID(pid_trim_t& trim, bool P_Gain_Boost, bool use_avg_on_DGain, SerialType& debug)
     : error(0)
-    , PID_output(0) 
+    , PID_output(0)
     , data_prev(0)
     , error_prev(0)
     , integral(0)
@@ -74,7 +74,7 @@ float PID::calculations(float data){
     if(use_avg){
         avr_error = (error + avr_error) / 2;
         derivative = avr_error;
-    } else derivative = (error - error_prev) / delta_time; 
+    } else derivative = (error - error_prev) / delta_time;
 
     PID_output = ((Kp + Kp_boost) * error + Ki * integral + Kd * derivative);
     PID_output = constrain(PID_output, -pid_output_constrain, pid_output_constrain);

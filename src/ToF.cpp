@@ -41,7 +41,7 @@ outputCode ToF::init_ToF(int8_t pin_off /* = -1*/, uint8_t changeAddress /* = 0x
         digitalWrite(pin_off, HIGH);
     }
     sensor_ToF.setMeasurementTimingBudget(updateToF);   //us
-    Wire.setClock(1000000);    //note that it is way bigger than the max from the datasheet(400kHz) 
+    Wire.setClock(1000000);    //note that it is way bigger than the max from the datasheet(400kHz)
     sensor_ToF.startContinuous();
     return OUT_CODE_OK;
 }

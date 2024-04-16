@@ -83,12 +83,12 @@ void test_motor_calc() {
     for (size_t i = 0; i < (sizeof(test_conversions) / sizeof(conversion_t)); i++) {
         conversion_t conv = test_conversions[i];
         const uint16_t m1 = motorctrl.calc_motor_vel(conv.m1.in, true);
-        debug_printf("m1 velocity %" PRId16 " -> % " PRIu16 " (expect %" PRIu16 ")", 
+        debug_printf("m1 velocity %" PRId16 " -> % " PRIu16 " (expect %" PRIu16 ")",
                             conv.m1.in, m1, conv.m1.out);
         TEST_ASSERT_EQUAL(conv.m1.out, m1);
 
         const uint16_t m2 = motorctrl.calc_motor_vel(conv.m1.in, false);
-        debug_printf("m2 velocity %" PRId16 " -> % " PRIu16 " (expect %" PRIu16 ")", 
+        debug_printf("m2 velocity %" PRId16 " -> % " PRIu16 " (expect %" PRIu16 ")",
                             conv.m2.in, m2, conv.m2.out);
         TEST_ASSERT_EQUAL(conv.m2.out, m2);
     }

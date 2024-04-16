@@ -9,7 +9,7 @@
 
 //pathControl
 #define CORNER_THR 300 //mm //If value is bigger or equal a corner is detected
-#define MAX_SPEED 40   //PERCENT that the controller should aim to meet
+#define MAX_SPEED 40   //PERCENT that the controller should aim to meet //TODO increase
 #define DEFAULT_DISTANCE 100
 #define TURN_ANGLE 80 //DEG //Angle the robot turns at an corner(measured with an IMU)
 

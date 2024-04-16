@@ -50,7 +50,7 @@ bool pathControl::init(){
 
         ret += !imu.init();
     #elif defined(ARDUINO_ARCH_ESP32)
-        xTaskCreatePinnedToCore(readI2CTaskImpl, "Read I2C devices", 10000, this, 10, &readI2C, 0);
+        xTaskCreate(readI2CTaskImpl, "Read I2C devices", 2046, this, 19, &readI2C);
     #endif
 
     ret += !motors->init();
@@ -88,9 +88,9 @@ void pathControl::readI2CTask(){
             frontToF->read_ToF_mm();
             backToF->read_ToF_mm();
         }
-        vTaskDelay(10);
+        //vTaskDelay(3);
         imu.imuReadTask();
-        vTaskDelay(1);
+        //vTaskDelay(3);
     }
     vTaskDelete(NULL);
 }

@@ -22,8 +22,9 @@ private:
     enum driveModes{
         drive_normal                = 0,
         drive_corner                = 1,
-        drive_one_no_new_ToF_data   = 2,
-        drive_both_no_new_ToF_data  = 3,
+        drive_corner_2              = 2,
+        drive_one_no_new_ToF_data   = 4,
+        drive_both_no_new_ToF_data  = 5,
     };
 
     enum ID_ToFSensor{

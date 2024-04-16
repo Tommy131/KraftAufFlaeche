@@ -121,8 +121,8 @@ outputCode pathControl::loop(){
             bool ToF_valid_front = frontToF->read_ToF_mm(ToF_data);
             bool ToF_valid_back  = backToF->read_ToF_mm(ToF_data);
         #elif defined(ARDUINO_ARCH_ESP32)
-            bool ToF_valid_front = frontToF->getValidRead();
-            bool ToF_valid_back  = frontToF->getValidRead();
+            #define ToF_valid_front     (frontToF->getValidRead())
+            #define ToF_valid_back      (frontToF->getValidRead())
         #endif     
 
         bool ToF_valid_all = (ToF_valid_front && ToF_valid_back) && (frontToF->getAvgRange() <= CORNER_THR || backToF->getAvgRange() <= CORNER_THR);   //indicates if all ToF's are operational and tracking the wall
@@ -139,6 +139,7 @@ outputCode pathControl::loop(){
         
         switch (driveState) {
         case drive_corner:
+        case drive_corner_2:
             return shortcutCorner();
             break;
         
@@ -212,14 +213,12 @@ outputCode pathControl::checkForCorner(ID_ToFSensor ToFtoRead, bool checkRotatio
     return OUT_CODE_NO_TOF_MESS;
 }
 
-int8_t state = 0; 
 
 outputCode pathControl::shortcutCorner(){
     const float curr = imu.getAttitude().z;
     float angleDifference = getDifference(curr, IMUangle);
     
-    if(state == 0) {
-        
+    if(driveState == drive_corner) {
         
         motors->normalDrive(30, -100);
         #if defined(ARDUINO_ARCH_ESP32)
@@ -227,47 +226,27 @@ outputCode pathControl::shortcutCorner(){
         #endif
         
         if (angleDifference >= TURN_ANGLE) {
-            state = 1;
+            driveState = drive_corner_2;
             IMUangle = IMUangle + 90; //emergency value if no other can be set
         }
     }
 
     
-    if (state == 1){
+    if (driveState == drive_corner_2){
 
         motors->normalDrive(speed, 0);
-        if(backToF->getLastRange() < 300) state = 2;
+        if(backToF->getLastRange() < 300) {
+            driveState = drive_normal;
+            return OUT_CODE_OK;
+        }
         // calc_steer = pidAngle->calculations(angleDifference);
         // motors->normalDrive(20, calc_steer);
         // if(checkAngle(estimateAngle(frontToF->getLastRange(), backToF->getLastRange()))){
-        //     state = 2;
+        //     driveState = drive_normal;
         // }
-    }
-    if(state == 2){
-        state = 0;
-        driveState = drive_normal;
-        return OUT_CODE_OK;
     }
     
     return OUT_CODE_PASS;
-    // calc_steer = pidAngle->calculations(imu.getAttitude().z + IMUangle);// + pidDist->calculations(frontToF->getAvgRange())*0.5;
-
-    // bool validAngle = checkAngle(estimateAngle(frontToF->getLastRange(), backToF->getLastRange()));
-
-    // if(validAngle)  numValid ++; 
-    // else            numValid = 0;
-
-    // motors->normalDrive(speed / 2, calc_steer);
-
-    // if(numValid >= numValidMax){
-    //     numValid = 0;
-    //     IMUoffset -= TURN_ANGLE;
-    //     correctIMUOffset();
-
-    //     driveState = drive_normal;
-    //     return OUT_CODE_OK;
-    // }
-    // return OUT_CODE_PASS;
 }
 
 

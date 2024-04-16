@@ -21,7 +21,6 @@
   HardwareSerial& serial_out = Serial;
 #endif
 
-//TODO: CONTROL TABLE MAX TORQUE
 
 //Init for PID
 pid::PID pidWall(default_pid_trim, 0, false, serial_out);
@@ -70,7 +69,7 @@ void setup() {
   runtimeConfig.setupRuntimeConfig();
   #endif
 
-#if defined(ARDUINO_ARCH_ESP32) 
+#if defined(ARDUINO_ARCH_ESP32)
 
   serial_out.printf("PathInitCode(1): %d\n", path.init());
   while (touchRead(PIN_TOUCH) >= TOUCH_THR); //Wait for start Signal
@@ -84,6 +83,8 @@ void setup() {
   
 } // setup
 
+// uint32_t loop_time = millis();
+// uint32_t loop_delta = 0;
 
 void loop() {
 
@@ -93,6 +94,11 @@ void loop() {
     runtimeConfig.loopRuntimeConfig();
   #endif
 
+  // serial_out.printf("loopDelta: %dms\n", loop_delta);
+  // if(millis()-loop_time > loop_delta) loop_delta = millis()-loop_time;
+  // if((millis()%1000) == 0) loop_delta = 0;
+  // loop_time = millis();
+
 } // loop
 #endif // PIO_UNIT_TESTING
 
@@ -100,10 +106,10 @@ void loop() {
 /**
  * Possible Start/Stop config with touch sensor
  * Global:
- * 
+ *
 // bool stopLoop = false;
 // uint16_t touchCNT = 0;
- * 
+ *
  * In loop():
 // if(touchRead(PIN_TOUCH) <= TOUCH_THR) touchCNT ++;
 // else                                  touchCNT = 0;

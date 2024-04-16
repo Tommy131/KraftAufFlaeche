@@ -22,8 +22,9 @@ private:
     enum driveModes{
         drive_normal                = 0,
         drive_corner                = 1,
-        drive_one_no_new_ToF_data   = 2,
-        drive_both_no_new_ToF_data  = 3,
+        drive_corner_2              = 2,
+        drive_one_no_new_ToF_data   = 4,
+        drive_both_no_new_ToF_data  = 5,
     };
 
     enum ID_ToFSensor{
@@ -45,8 +46,10 @@ private:
     IMU imu;
 
     uint32_t lastMS;
-    const uint32_t loopIntervalTime = 50; //ms //interval of loop()
+    const uint32_t loopIntervalTime = 40; //ms //interval of loop()
     const uint32_t maxTimeCorner = 1000; //ms //max time the robot has to determine if its a corner
+
+    const uint32_t numValidMax = 50; //Loops where the angle has to be valid
 
     pid::PID pidDefault = pid::PID(default_pid_trim, 0, false, serial_out);
     pid::PID *pidDist;
@@ -63,6 +66,10 @@ private:
     driveModes driveState  = drive_normal;
     float calc_steer = 0;
 
+    size_t numValid = 0;
+    float IMUangle;
+
+    float correctAngle(float angle );
 
     /**
      * @brief checks angle for validity
@@ -70,6 +77,15 @@ private:
      * @return true if valid, false otherwise
      * */    
     inline bool checkAngle(float angle);
+
+    float getDifference(float num1, float num2);
+
+    #if defined(ARDUINO_ARCH_ESP32)
+    TaskHandle_t readI2C;
+    static void readI2CTaskImpl( void * parameter);
+    void readI2CTask();
+    #endif
+
 public:
     pathControl(uint16_t _dist, SerialType& _serial_out, MotorControl *_motors = nullptr, ToF *_front_ToF = nullptr, ToF *_backToF = nullptr, pid::PID *_pidDist = nullptr, pid::PID *_pidAngle = nullptr);
     ~pathControl();

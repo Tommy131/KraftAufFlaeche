@@ -10,7 +10,7 @@
 // This namespace is required to use Control table item names
 using namespace ControlTableItem;
 
-MotorControl::MotorControl(SerialType& serialDebug) : 
+MotorControl::MotorControl(SerialType& serialDebug) :
             serialOut(serialDebug)
     #if defined(ARDUINO_ARCH_ESP32)
             , dxl(DXL_SERIAL, PIN_SW_DXL)
@@ -53,7 +53,7 @@ outputCode MotorControl::init(){
                 serialOut.print("ERROR ON INIT with ID: ");
                 serialOut.println(i);
             #endif //DEBUG_SERVO
-            return OUT_CODE_ERR_MOTOR;    
+            return OUT_CODE_ERR_MOTOR;
         }
     }
     return OUT_CODE_OK;

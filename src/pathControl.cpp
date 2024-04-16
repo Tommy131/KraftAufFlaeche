@@ -28,7 +28,7 @@ pathControl::pathControl(uint16_t _dist, SerialType& _serial_out, MotorControl *
     if(_frontToF == nullptr)    frontToF = &backToF_default;
     else                        frontToF = _frontToF;
 
-    if(_backToF == nullptr)     backToF = &backToF_default; 
+    if(_backToF == nullptr)     backToF = &backToF_default;
     else                        backToF = _backToF;
 
     if(_pidDist == nullptr)     pidDist = &pidDefault;
@@ -43,10 +43,15 @@ pathControl::~pathControl(){}
 
 bool pathControl::init(){
     uint8_t ret = 0;
-    if(!backToF->getInit())     ret += !backToF->init_ToF(PIN_XSHUT_TOF_1, ADDRESS_TOF_2);
-    if(!frontToF->getInit())    ret += !frontToF->init_ToF();
-    
-    ret += !imu.init();
+
+    #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
+        if(!backToF->getInit())     ret += !backToF->init_ToF(PIN_XSHUT_TOF_1, ADDRESS_TOF_2);
+        if(!frontToF->getInit())    ret += !frontToF->init_ToF();
+
+        ret += !imu.init();
+    #elif defined(ARDUINO_ARCH_ESP32)
+        xTaskCreate(readI2CTaskImpl, "Read I2C devices", 2046, this, 19, &readI2C);
+    #endif
 
     ret += !motors->init();
     motors->normalDrive(0,0);
@@ -54,52 +59,95 @@ bool pathControl::init(){
     pidDist->setSetPoint(dist);
     pidAngle->setSetPoint(ANGLE_TO_WALL_PARALLEL);
     
-    delay(1000);
-    //imu.calculate_IMU_error();
-    
+    // delay(1000);
+    // imu.calculate_IMU_error();
     if(ret == 0) return true;
     return false;
 }
+#if defined(ARDUINO_ARCH_ESP32)
+
+void pathControl::readI2CTaskImpl( void * parameter){
+    ((pathControl*) parameter)->readI2CTask();
+}
+
+void pathControl::readI2CTask(){
+    uint8_t ret = 0;
+    if(!backToF->getInit())     ret += !backToF->init_ToF(PIN_XSHUT_TOF_1, ADDRESS_TOF_2);
+    if(!frontToF->getInit())    ret += !frontToF->init_ToF();
+
+
+    ret += !imu.init();
+
+    Wire.setClock(400000);
+    uint64_t lastToFRead = micros();
+
+    for(;;){
+        if(micros() - lastToFRead >= ToF::updateToF){
+            lastToFRead = micros();
+
+            frontToF->read_ToF_mm();
+            backToF->read_ToF_mm();
+        }
+        //vTaskDelay(3);
+        imu.imuReadTask();
+        //vTaskDelay(3);
+    }
+    vTaskDelete(NULL);
+}
+
+#endif
 
 
 outputCode pathControl::loop(){
-    
-    // imu.imuReadTask();
+
+    #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
+        imu.imuReadTask();
+    #endif
     
     if(millis() - lastMS > loopIntervalTime){
         lastMS = millis();
         /**
          * 1. Check Sensors
          * 2. check for special action(shortcutCorner)
-         * 3. RUN PID   //TODO: Separate PID for front and back?
+         * 3. RUN PID
          * 4. run Checks (Corner)
          * 5. write to Motors
         */
         
         //Step 1.
-        uint16_t ToF_data = 0;
-        bool ToF_valid_front = frontToF->read_ToF_mm(ToF_data);
-        bool ToF_valid_back  = backToF->read_ToF_mm(ToF_data);                    
+        
+        #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
+            uint16_t ToF_data = 0;
+            bool ToF_valid_front = frontToF->read_ToF_mm(ToF_data);
+            bool ToF_valid_back  = backToF->read_ToF_mm(ToF_data);
+        #elif defined(ARDUINO_ARCH_ESP32)
+            #define ToF_valid_front     (frontToF->getValidRead())
+            #define ToF_valid_back      (frontToF->getValidRead())
+        #endif
+
         bool ToF_valid_all = (ToF_valid_front && ToF_valid_back) && (frontToF->getAvgRange() <= CORNER_THR || backToF->getAvgRange() <= CORNER_THR);   //indicates if all ToF's are operational and tracking the wall
 
         if(ToF_valid_all){
             real_ToF_dist = calculateDist(frontToF->getAvgRange(), backToF->getAvgRange());
             rotation = estimateAngle(frontToF->getAvgRange(), backToF->getAvgRange());
         }
+        #if defined(ARDUINO_ARCH_ESP32)
+            // serial_out.printf("ToF1: %d, ToF2: %d, speed:%d, dist: %dmm, rot:%.2f PID: %f, driveState:%d, IMUangle: %.2f, angleZ: %.2f\n", frontToF->getAvgRange(), backToF->getAvgRange(), speed, real_ToF_dist, rotation*RAD_TO_DEG, calc_steer, driveState, IMUangle, imu.getAttitude().z);  //debug output for testing
+        #endif
 
         //Step 2.
-
+        
         switch (driveState) {
         case drive_corner:
-            //return shortcutCorner();
-            
-            // break;
+        case drive_corner_2:
+            return shortcutCorner();
+            break;
         
         default:    //Normal Operation
 
             //Step 3.
             if(ToF_valid_all && checkAngle(rotation)){
-                calc_steer = pidAngle->calculations(rotation) + pidDist->calculations(real_ToF_dist)*0.5;
+                calc_steer = constrain(pidAngle->calculations(rotation) + pidDist->calculations(real_ToF_dist)*0.5, -30, 30);
             } else if(ToF_valid_back) {
                 calc_steer = pidDist->calculations(backToF->getAvgRange());
             } else if (ToF_valid_front) {
@@ -109,21 +157,17 @@ outputCode pathControl::loop(){
                 return OUT_CODE_NO_TOF_MESS;
             }
 
-            //Step 4.
-            outputCode ret = checkForCorner(ID_frontTof, false);
-            if(ret == OUT_CODE_NO_TOF_MESS) return OUT_CODE_NO_TOF_MESS;
-            //else if(ret == OUT_CODE_CORNER) driveState = drive_corner;
-            else                            driveState = drive_normal;
+            if(rotation <= (91.0*DEG_TO_RAD) && rotation >= (89.0*DEG_TO_RAD)) IMUangle = imu.getAttitude().z;
 
+            //Step 4.
+            outputCode ret = checkForCorner(ID_frontTof);
+            if(ret == OUT_CODE_NO_TOF_MESS) return OUT_CODE_NO_TOF_MESS;
+            else if(ret == OUT_CODE_CORNER) driveState = drive_corner;
+            else                            driveState = drive_normal;
+        
             //Step 5.
 
-            #if defined(ARDUINO_ARCH_ESP32)
-                serial_out.printf("ToF1: %d, ToF2: %d, speed:%d, dist: %dmm, rot:%.2f PID: %f, driveState:%d, angleX: %.2f, angleY: %.2f, angleZ: %.2f\n", frontToF->getAvgRange(), backToF->getAvgRange(), speed, real_ToF_dist, rotation*RAD_TO_DEG, calc_steer, driveState, imu.getGyro().x, imu.getAttitude().y, imu.getAttitude().z);  //debug output for testing
-                //serial_out.println(imu.getAttitude().y);
-            #endif
-
             motors->normalDrive(speed, calc_steer);
-
             break;
         }
         return OUT_CODE_OK;
@@ -133,71 +177,96 @@ outputCode pathControl::loop(){
 }
 
 outputCode pathControl::checkForCorner(ID_ToFSensor ToFtoRead, bool checkRotation /*= true*/){
-    //TODO: More Sophisticated?
     ToF *readToF = backToF;
-    ToF *secToF = frontToF; 
+    ToF *secToF = frontToF;
     if(ToFtoRead == ID_ToFSensor::ID_frontTof) {
         readToF = frontToF;
         secToF = backToF;
     }
 
-    readToF->read_ToF_mm();
-    secToF->read_ToF_mm();
+    #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_MEGA2560) // When using Arduino
+        readToF->read_ToF_mm();
+        secToF->read_ToF_mm();
+    #endif
 
-    if(!checkAngle(rotation) && checkRotation && secToF->getAvgRange() <= CORNER_THR) {
+    if(!checkAngle(rotation) && checkRotation && secToF->getLastRange() <= CORNER_THR) {
         uint32_t startTimeMs = millis();
-
         motors->normalDrive(speed, 0);
 
         while(millis() - startTimeMs <= maxTimeCorner) {
+
             outputCode ret = checkForCorner(ToFtoRead, false);
             #if defined(ARDUINO_ARCH_ESP32)
-                serial_out.printf("T-ms %d, ToF1: %d, ToF2: %d\n",millis() - startTimeMs, frontToF->getAvgRange(), backToF->getAvgRange());
-            #endif 
+                //serial_out.printf("T-ms %d, ToF1: %d, ToF2: %d\n",millis() - startTimeMs, frontToF->getLastRange(), backToF->getLastRange());
+            #endif
             if(ret != OUT_CODE_OK) return ret;
         }
     }
 
-    if(readToF->getValidRead() && secToF->getValidRead()){
-        if(readToF->getAvgRange() >= CORNER_THR && secToF->getAvgRange() <= CORNER_THR)   {
+    if(secToF->getValidRead()){
+        if((readToF->getLastRange() >= CORNER_THR || !readToF->getValidRead()) && secToF->getLastRange() <= CORNER_THR)   {
             return OUT_CODE_CORNER;
         }
         return OUT_CODE_OK;
-    } 
+    }
     return OUT_CODE_NO_TOF_MESS;
 }
 
+
 outputCode pathControl::shortcutCorner(){
-    motors->normalDrive(speed/2, -100);    //TODO TUNING!!!!!
-    outputCode ret = OUT_CODE_CORNER;
-    delay(100);
-    while(ret == OUT_CODE_CORNER) {
-        ret = checkForCorner(ID_frontTof, false);
-        if(ret == OUT_CODE_NO_TOF_MESS) return OUT_CODE_NO_TOF_MESS;
+    const float curr = imu.getAttitude().z;
+    float angleDifference = getDifference(curr, IMUangle);
+    
+    if(driveState == drive_corner) {
+        
+        motors->normalDrive(30, -100);
+        #if defined(ARDUINO_ARCH_ESP32)
+        // serial_out.printf("val: %.2f, SetAngle:%.2f, diff: %.2f, delta: %.2f\n", imu.getAttitude().z, IMUangle, angleDifference, (max(curr, IMUangle) - min(curr, IMUangle)));
+        #endif
+        
+        if (angleDifference >= TURN_ANGLE) {
+            driveState = drive_corner_2;
+            IMUangle = IMUangle + 90; //emergency value if no other can be set
+        }
     }
 
-    ret = OUT_CODE_CORNER;
-    pidDist->reset();
-    while(ret == OUT_CODE_CORNER) {
-        ret = checkForCorner(ID_backToF, false);
-        if(ret == OUT_CODE_NO_TOF_MESS) return OUT_CODE_NO_TOF_MESS;
+    
+    if (driveState == drive_corner_2){
 
-        bool angleValid = checkAngle(estimateAngle(frontToF->read_ToF_mm(), backToF->read_ToF_mm()));
-
-        calc_steer = pidDist->calculations(frontToF->read_ToF_mm());
-        motors->normalDrive(speed/2, calc_steer);
-
-        if(angleValid) break;
+        motors->normalDrive(speed, 0);
+        if(backToF->getLastRange() < 300) {
+            driveState = drive_normal;
+            return OUT_CODE_OK;
+        }
+        // calc_steer = pidAngle->calculations(angleDifference);
+        // motors->normalDrive(20, calc_steer);
+        // if(checkAngle(estimateAngle(frontToF->getLastRange(), backToF->getLastRange()))){
+        //     driveState = drive_normal;
+        // }
     }
+    
+    return OUT_CODE_PASS;
+}
 
-    driveState = drive_normal;
-    return OUT_CODE_OK;
+
+
+float pathControl::correctAngle(float angle ){
+    if(angle > 180) angle -= 360;
+    else if (angle < -180) angle += 360;
+    return angle;
+}
+
+float pathControl::getDifference(float num1, float num2){
+    //num1-num2
+    float result = correctAngle(num1 - num2);
+
+    return result;
 }
 
 void pathControl::stopMotors(){
     if(millis() - lastMS > loopIntervalTime){
         lastMS = millis();
-        motors->normalDrive(0, 0); 
+        motors->normalDrive(0, 0);
     }
 }
 
@@ -211,12 +280,12 @@ void pathControl::setSpeed(int8_t _speed) {
 }
 
 
-void pathControl::setDist(uint16_t _dist) { 
+void pathControl::setDist(uint16_t _dist) {
     serial_out.print("Updating distance from: ");
     serial_out.print(dist, DEC);
     serial_out.print("; to ");
     serial_out.println(_dist, DEC);
-    dist = constrain(_dist, 0, 2000); 
+    dist = constrain(_dist, 0, 2000);
     pidDist->setSetPoint(dist);
 }
 
@@ -239,7 +308,7 @@ inline bool pathControl::checkAngle(float angle){
 
 uint16_t pathControl::calculateDist(uint16_t dist1_raw, uint16_t dist2_raw){
     float angle = estimateAngle(dist1_raw, dist2_raw);
-    if(checkAngle(angle)) 
+    if(checkAngle(angle))
         return estimateRealDistance(angle, DISTANCE_TOF_MID + dist1_raw);
     return DISTANCE_TOF_MID + dist2_raw;
 }

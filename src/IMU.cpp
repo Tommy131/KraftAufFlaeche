@@ -4,7 +4,7 @@
 #include <Wire.h>
 #include "constants.h"
 #include "MPU6050.h"
-  
+
 IMU::IMU(/* args */) {
 }
 
@@ -19,15 +19,15 @@ outputCode IMU::init() {
     #elif defined(ARDUINO_ARCH_ESP32)
         Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
     #endif
-    
+
     Wire.setClock(1000000); //Note this is 2.5 times the spec sheet 400 kHz max...
-    
+
     mpu6050.initialize();
 
       if (mpu6050.testConnection() == false) {
-        return OUT_CODE_MPU_ERR; 
+        return OUT_CODE_MPU_ERR;
       }
-    
+
     //From the reset state all registers should be 0x00, so we should be at
     //max sample rate with digital low pass filter(s) off.  All we need to
     //do is set the desired fullscale ranges
@@ -43,7 +43,7 @@ outputCode IMU::init() {
 void IMU::getIMUdata() {
     //DESCRIPTION: Request full dataset from IMU and LP filter gyro, accelerometer, and magnetometer data
     /*
-    * Reads accelerometer, gyro, and magnetometer data from IMU as Acc.x, Acc.y, Acc.z, Gyro.x, Gyro.y, Gyro.z, MagX, MagY, MagZ. 
+    * Reads accelerometer, gyro, and magnetometer data from IMU as Acc.x, Acc.y, Acc.z, Gyro.x, Gyro.y, Gyro.z, MagX, MagY, MagZ.
     * These values are scaled according to the IMU datasheet to put them into correct units of g's and deg/sec. A simple first-order
     * low-pass filter is used to get rid of high frequency noise in these raw signals. Generally you want to cut
     * off everything past 80Hz, but if your loop rate is not fast enough, the low pass filter will cause a lag in
@@ -51,7 +51,7 @@ void IMU::getIMUdata() {
     */
     int16_t AcX,AcY,AcZ,GyX,GyY,GyZ;
 
-    mpu6050.getMotion6(&AcX, &AcY, &AcZ, &GyX, &GyY, &GyZ);
+    mpu6050.getMotion6(&AcZ, &AcY, &AcX, &GyZ, &GyY, &GyX);
 
 
     //Accelerometer
@@ -91,9 +91,9 @@ void IMU::getIMUdata() {
 void IMU::calculate_IMU_error() {
   //DESCRIPTION: Computes IMU accelerometer and gyro error on startup. Note: vehicle should be powered up on flat surface
   /*
-   * Don't worry too much about what this is doing. The error values it computes are applied to the raw gyro and 
+   * Don't worry too much about what this is doing. The error values it computes are applied to the raw gyro and
    * accelerometer values Acc.x, Acc.y, Acc.z, Gyro.x, Gyro.y, Gyro.z in getIMUdata(). This eliminates drift in the
-   * measurement. 
+   * measurement
    */
   int16_t AcX,AcY,AcZ,GyX,GyY,GyZ;
   data3D AccError = {};
@@ -101,14 +101,14 @@ void IMU::calculate_IMU_error() {
   //Read IMU values 12000 times
   int c = 0;
   while (c < 12000) {
-    mpu6050.getMotion6(&AcX, &AcY, &AcZ, &GyX, &GyY, &GyZ);
+    mpu6050.getMotion6(&AcZ, &AcY, &AcX, &GyZ, &GyY, &GyX);
     Acc.x  = AcX / ACCEL_SCALE_FACTOR;
     Acc.y  = AcY / ACCEL_SCALE_FACTOR;
     Acc.z  = AcZ / ACCEL_SCALE_FACTOR;
     Gyro.x = GyX / GYRO_SCALE_FACTOR;
     Gyro.y = GyY / GYRO_SCALE_FACTOR;
     Gyro.z = GyZ / GYRO_SCALE_FACTOR;
-    
+
     //Sum all readings
     AccError.x  = AccError.x + Acc.x;
     AccError.y  = AccError.y + Acc.y;
@@ -125,7 +125,7 @@ void IMU::calculate_IMU_error() {
   GyroError.x = GyroError.x / c;
   GyroError.y = GyroError.y / c;
   GyroError.z = GyroError.z / c;
-  
+
   Serial.print("float AccErrorX = ");
   Serial.print(AccError.x);
   Serial.println(";");
@@ -135,7 +135,7 @@ void IMU::calculate_IMU_error() {
   Serial.print("float AccErrorZ = ");
   Serial.print(AccError.z);
   Serial.println(";");
-  
+
   Serial.print("float GyroErrorX = ");
   Serial.print(GyroError.x);
   Serial.println(";");
@@ -237,9 +237,9 @@ void IMU::Madgwick6DOF(float gx, float gy, float gz, float ax, float ay, float a
 
 void IMU::imuReadTask(){
   if(micros() - current_time >= FREQUENCY_IMU){
-    prev_time = current_time;      
-    current_time = micros();      
-    dt = (current_time - prev_time)/1000000.0; 
+    prev_time = current_time;
+    current_time = micros();
+    dt = (current_time - prev_time)/1000000.0;
     getIMUdata();
     Madgwick6DOF(Gyro.x, -Gyro.y, -Gyro.z, -Acc.x, Acc.y, Acc.z, dt);
   }

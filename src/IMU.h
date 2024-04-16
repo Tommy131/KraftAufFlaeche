@@ -28,21 +28,58 @@ public:
 
 private:
     MPU6050 mpu6050;
-    #define ACCEL_SCALE MPU6050_ACCEL_FS_2
-    #define ACCEL_SCALE_FACTOR 16384.0
-    #define GYRO_SCALE MPU6050_GYRO_FS_250
+
+    #define ACCEL_4G
+    #define GYRO_500DPS
+
+    #define GYRO_FS_SEL_250    MPU6050_GYRO_FS_250
+    #define GYRO_FS_SEL_500    MPU6050_GYRO_FS_500
+    #define GYRO_FS_SEL_1000   MPU6050_GYRO_FS_1000
+    #define GYRO_FS_SEL_2000   MPU6050_GYRO_FS_2000
+    #define ACCEL_FS_SEL_2     MPU6050_ACCEL_FS_2
+    #define ACCEL_FS_SEL_4     MPU6050_ACCEL_FS_4
+    #define ACCEL_FS_SEL_8     MPU6050_ACCEL_FS_8
+    #define ACCEL_FS_SEL_16    MPU6050_ACCEL_FS_16
+
+  
+    #if defined GYRO_250DPS
+    #define GYRO_SCALE GYRO_FS_SEL_250
     #define GYRO_SCALE_FACTOR 131.0
+    #elif defined GYRO_500DPS
+    #define GYRO_SCALE GYRO_FS_SEL_500
+    #define GYRO_SCALE_FACTOR 65.5
+    #elif defined GYRO_1000DPS
+    #define GYRO_SCALE GYRO_FS_SEL_1000
+    #define GYRO_SCALE_FACTOR 32.8
+    #elif defined GYRO_2000DPS
+    #define GYRO_SCALE GYRO_FS_SEL_2000
+    #define GYRO_SCALE_FACTOR 16.4
+    #endif
+
+    #if defined ACCEL_2G
+    #define ACCEL_SCALE ACCEL_FS_SEL_2
+    #define ACCEL_SCALE_FACTOR 16384.0
+    #elif defined ACCEL_4G
+    #define ACCEL_SCALE ACCEL_FS_SEL_4
+    #define ACCEL_SCALE_FACTOR 8192.0
+    #elif defined ACCEL_8G
+    #define ACCEL_SCALE ACCEL_FS_SEL_8
+    #define ACCEL_SCALE_FACTOR 4096.0
+    #elif defined ACCEL_16G
+    #define ACCEL_SCALE ACCEL_FS_SEL_16
+    #define ACCEL_SCALE_FACTOR 2048.0
+    #endif
+
 
     //IMU:
 
-    const float AccErrorX = 1.02;
+    const float AccErrorX = -0.16;
     const float AccErrorY = -0.02;
-    const float AccErrorZ = -1.15;
-
-
-    const float GyroErrorX = -1.71;
-    const float GyroErrorY = 0.71;
-    const float GyroErrorZ = 0.33;
+    const float AccErrorZ = 0.02;
+    
+    const float GyroErrorX = 0.32;
+    const float GyroErrorY = 0.72;
+    const float GyroErrorZ = -1.73;
 
     float B_madgwick = 0.04;  //Madgwick filter parameter
     const float B_accel = 0.14;     //Accelerometer LP filter paramter, (MPU6050 default: 0.14.)
